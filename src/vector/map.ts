@@ -1,6 +1,7 @@
 import { ValueNode } from "../value-node.js";
 import { VectorNode } from "./vector-node.js";
 import { BaseVectorNode } from "./base-vector-node";
+import { Frame } from "frame.js";
 
 export function map<T, NT extends ValueNode<T>, U, NU extends ValueNode<U>>(
     vectorNode: VectorNode<T, NT>, mapper: (element: NT) => NU)
@@ -9,6 +10,8 @@ export function map<T, NT extends ValueNode<T>, U, NU extends ValueNode<U>>(
 }
 
 class MapVectorNode<T, NT extends ValueNode<T>, U, NU extends ValueNode<U>> extends BaseVectorNode<U, NU> {
+  private input: VectorNode<T, NT>;
+
   constructor(
       input: VectorNode<T, NT>,
       mapper: (element: NT) => NU) {
@@ -22,6 +25,8 @@ class MapVectorNode<T, NT extends ValueNode<T>, U, NU extends ValueNode<U>> exte
 
     super(input.scope, elementNode);
 
+    this.input = input;
+
     // Propagate insertion/deletion events.
     input.addElementInsertedObserver((frame, index) => {
       this.broadcastElementInsertedEvent(frame, index);
@@ -29,5 +34,13 @@ class MapVectorNode<T, NT extends ValueNode<T>, U, NU extends ValueNode<U>> exte
     input.addElementDeletedObserver((frame, index) => {
       this.broadcastElementDeletedEvent(frame, index);
     });
+  }
+
+  size(frame: Frame): number {
+    return this.input.size(frame);
+  }
+
+  element(frame: Frame, index: number): Frame {
+    return this.input.element(frame, index);
   }
 }

@@ -1,5 +1,6 @@
 import { ValueNode } from "../value-node.js";
-import { BaseVectorNode, VectorNode } from "./vector-node.js";
+import { VectorNode } from "./vector-node.js";
+import { BaseVectorNode } from "./base-vector-node";
 
 export function map<T, NT extends ValueNode<T>, U, NU extends ValueNode<U>>(
     vectorNode: VectorNode<T, NT>, mapper: (element: NT) => NU)
@@ -12,6 +13,13 @@ class MapVectorNode<T, NT extends ValueNode<T>, U, NU extends ValueNode<U>> exte
       input: VectorNode<T, NT>,
       mapper: (element: NT) => NU) {
     const elementNode = mapper(input.elementNode);
+
+    // Check that we are not using nodes from an incorrect scope.
+    // TODO: Support referencing nodes from parent scopes.
+    if (elementNode.scope !== input.elementNode.scope) {
+      throw "incorrect scope";
+    }
+
     super(input.scope, elementNode);
 
     // Propagate insertion/deletion events.

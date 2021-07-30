@@ -4,14 +4,14 @@ import { ValueNode } from "../value-node.js";
 import { BaseVectorNode } from "./base-vector-node.js";
 import { MutableVectorNode } from "./mutable-vector-node.js"
 
-export function materialVector<T, NT extends ValueNode<T>>(scope: Scope, elementNode: NT): MutableVectorNode<T, NT> {
-  return new MaterialVectorNode<T, NT>(scope, elementNode);
+export function materialVector<NT extends ValueNode>(scope: Scope, elementNode: NT): MutableVectorNode<NT> {
+  return new MaterialVectorNode<NT>(scope, elementNode);
 }
 
-class MaterialVectorNode<T, NT extends ValueNode<T>> extends BaseVectorNode<T, NT> implements MutableVectorNode<T, NT> {
+class MaterialVectorNode<T extends ValueNode> extends BaseVectorNode<T> implements MutableVectorNode<T> {
   private frameKey = newFrameKey();
 
-  constructor(scope: Scope, elementNode: NT) {
+  constructor(scope: Scope, elementNode: T) {
     super(scope, elementNode);
   }
 
@@ -27,7 +27,7 @@ class MaterialVectorNode<T, NT extends ValueNode<T>> extends BaseVectorNode<T, N
     return this.access(frame)[index];
   }
 
-  insert(frame: Frame, beforeIndex: number | undefined, initializer: (elementNode: NT, frame: Frame) => void): void {
+  insert(frame: Frame, beforeIndex: number | undefined, initializer: (elementNode: T, frame: Frame) => void): void {
     const elementFrame = frame.newChild();
     initializer(this.elementNode, elementFrame);
 

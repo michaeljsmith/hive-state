@@ -4,11 +4,7 @@ import { Node } from "../node.js";
 import { BaseVectorNode } from "./base-vector-node.js";
 import { MutableVectorNode } from "./mutable-vector-node.js"
 
-export function materialVector<NT extends Node>(scope: Scope, elementNode: NT): MutableVectorNode<NT> {
-  return new MaterialVectorNode<NT>(scope, elementNode);
-}
-
-class MaterialVectorNode<T extends Node> extends BaseVectorNode<T> implements MutableVectorNode<T> {
+export class MaterialVectorNode<T extends Node> extends BaseVectorNode<T> implements MutableVectorNode<T> {
   private frameKey = newFrameKey();
 
   constructor(scope: Scope, elementNode: T) {

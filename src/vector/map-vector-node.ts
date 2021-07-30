@@ -3,17 +3,11 @@ import { VectorNode } from "./vector-node.js";
 import { BaseVectorNode } from "./base-vector-node";
 import { Frame } from "frame.js";
 
-export function map<T, NT extends Node<T>, U, NU extends Node<U>>(
-    vectorNode: VectorNode<T, NT>, mapper: (element: NT) => NU)
-: VectorNode<U, NU> {
-  return new MapVectorNode<T, NT, U, NU>(vectorNode, mapper);
-}
-
-class MapVectorNode<T, NT extends Node<T>, U, NU extends Node<U>> extends BaseVectorNode<U, NU> {
-  private input: VectorNode<T, NT>;
+export class MapVectorNode<NT extends Node, NU extends Node> extends BaseVectorNode<NU> {
+  private input: VectorNode<NT>;
 
   constructor(
-      input: VectorNode<T, NT>,
+      input: VectorNode<NT>,
       mapper: (element: NT) => NU) {
     const elementNode = mapper(input.elementNode);
 
@@ -34,6 +28,10 @@ class MapVectorNode<T, NT extends Node<T>, U, NU extends Node<U>> extends BaseVe
     input.addElementDeletedObserver((frame, index) => {
       this.broadcastElementDeletedEvent(frame, index);
     });
+  }
+
+  initialize(frame: Frame): void {
+    // No initialization required.
   }
 
   size(frame: Frame): number {

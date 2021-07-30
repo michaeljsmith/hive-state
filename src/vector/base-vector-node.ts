@@ -2,8 +2,8 @@ import { Frame } from "frame.js";
 import { Scope } from "scope.js";
 import { Node } from "../node.js";
 import { BaseNode } from "../base-node";
-import { map } from "./map.js";
 import { VectorNode, VectorElementInsertedObserver, VectorElementDeletedObserver } from "./vector-node";
+import { MapVectorNode } from "./map-vector-node.js";
 
 export abstract class BaseVectorNode<T extends Node> extends BaseNode implements VectorNode<T> {
   private elementInsertedObservers: VectorElementInsertedObserver[] = [];
@@ -21,7 +21,7 @@ export abstract class BaseVectorNode<T extends Node> extends BaseNode implements
   abstract element(frame: Frame, index: number): Frame;
 
   map<U extends Node>(mapper: (element: T) => U): VectorNode<U> {
-    return map(this, mapper);
+    return new MapVectorNode<T, U>(this, mapper);
   }
 
   addElementInsertedObserver(observer: VectorElementInsertedObserver): void {

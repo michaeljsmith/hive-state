@@ -1,11 +1,11 @@
 import { Frame } from "frame.js";
 import { Scope } from "scope.js";
-import { ValueNode } from "../value-node.js";
-import { BaseValueNode } from "../base-value-node";
+import { Node } from "../node.js";
+import { ValueNode } from "../base-node";
 import { map } from "./map.js";
 import { VectorNode, VectorElementInsertedObserver, VectorElementDeletedObserver } from "./vector-node";
 
-export abstract class BaseVectorNode<T extends ValueNode> extends BaseValueNode implements VectorNode<T> {
+export abstract class BaseVectorNode<T extends Node> extends ValueNode implements VectorNode<T> {
   private elementInsertedObservers: VectorElementInsertedObserver[] = [];
   private elementDeletedObservers: VectorElementDeletedObserver[] = [];
 
@@ -20,7 +20,7 @@ export abstract class BaseVectorNode<T extends ValueNode> extends BaseValueNode 
 
   abstract element(frame: Frame, index: number): Frame;
 
-  map<U extends ValueNode>(mapper: (element: T) => U): VectorNode<U> {
+  map<U extends Node>(mapper: (element: T) => U): VectorNode<U> {
     return map(this, mapper);
   }
 

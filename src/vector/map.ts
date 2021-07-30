@@ -1,15 +1,15 @@
-import { ValueNode } from "../value-node.js";
+import { Node } from "../node.js";
 import { VectorNode } from "./vector-node.js";
 import { BaseVectorNode } from "./base-vector-node";
 import { Frame } from "frame.js";
 
-export function map<T, NT extends ValueNode<T>, U, NU extends ValueNode<U>>(
+export function map<T, NT extends Node<T>, U, NU extends Node<U>>(
     vectorNode: VectorNode<T, NT>, mapper: (element: NT) => NU)
 : VectorNode<U, NU> {
   return new MapVectorNode<T, NT, U, NU>(vectorNode, mapper);
 }
 
-class MapVectorNode<T, NT extends ValueNode<T>, U, NU extends ValueNode<U>> extends BaseVectorNode<U, NU> {
+class MapVectorNode<T, NT extends Node<T>, U, NU extends Node<U>> extends BaseVectorNode<U, NU> {
   private input: VectorNode<T, NT>;
 
   constructor(

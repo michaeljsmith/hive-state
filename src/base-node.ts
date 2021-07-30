@@ -1,8 +1,8 @@
 import { Frame } from "frame.js";
 import { Scope } from "./scope.js";
-import { ValueNode } from "./value-node";
+import { Node } from "./node";
 
-export abstract class BaseValueNode implements ValueNode {
+export abstract class ValueNode implements Node {
   readonly scope: Scope;
 
   constructor(scope: Scope) {

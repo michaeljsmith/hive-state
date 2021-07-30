@@ -42,9 +42,6 @@ export class MaterialVectorNode<T extends Node> extends BaseVectorNode<T> implem
 
   private access(frame: Frame): Frame[] {
     const array = frame.get(this.frameKey);
-    if (array === undefined) {
-      throw 'undefined array';
-    }
     return array as Frame[];
   }
 }

@@ -19,6 +19,9 @@ class FrameImpl implements Frame {
   }
 
   get(key: FrameKey): unknown {
+    if (!(key in this.frameMap)) {
+      throw 'undefined value';
+    }
     return this.frameMap[key];
   }
 

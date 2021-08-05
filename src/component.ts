@@ -1,11 +1,14 @@
+import { Frame } from "./stack.js";
 import { Change, Query, ValueType } from "./value-type.js";
 
-export interface ComponentContext<Inputs extends ValueType[], O extends ValueType> {
-  handleInputQuery<InputKey extends number, R>(inputKey: InputKey, query: Query<Inputs[InputKey], R>): R;
-  handleOutputChange(change: Change<O>): void;
-}
+export type InputQuerier<Inputs extends {}> = <InputKey extends keyof Inputs, R>(
+    stack: Frame,
+    inputKey: InputKey,
+    query: Inputs[InputKey] extends ValueType ? Query<Inputs[InputKey], R> : never)
+  => R;
 
-export interface Component<Inputs extends ValueType[], O extends ValueType> {
-  handleInputChange<InputKey extends number>(context: ComponentContext<Inputs, O>, inputKey: InputKey, change: Change<Inputs[InputKey]>): void;
-  handleOutputQuery<R>(context: ComponentContext<Inputs, O>, query: Query<O, R>): R;
+export interface Component<Inputs extends {}, O extends ValueType> {
+  construct?: (inputQuerier: InputQuerier<Inputs>, stack: Frame) => {};
+  update(inputQuerier: InputQuerier<Inputs>, self: unknown, stack: Frame, changes: {[K in keyof Inputs]?: Inputs[K] extends ValueType ? Change<Inputs[K]> : never}): Change<O>;
+  query<R>(inputQuerier: InputQuerier<Inputs>, self: unknown, stack: Frame, query: Query<O, R>): R;
 }

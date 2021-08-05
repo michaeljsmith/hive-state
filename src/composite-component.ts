@@ -1,4 +1,5 @@
-import { InputQuerier, Node } from "./component.js";
+import { InputQuerier } from "./input-querier.js";
+import { Node } from "./node";
 import { FrameKey, newFrameKey } from "./frame-key.js";
 import { InstanceId } from "./instance-id";
 import { Frame, pop, push } from "./stack.js";

@@ -9,7 +9,6 @@ export type InstanceInput<Inputs extends {}> =
   { type: 'input', inputId: keyof Inputs } |
   { type: 'instance', instanceId: InstanceId };
 
-// TODO: Get rid of this.
 export type Instance<Inputs extends {}> = {
   id: InstanceId;
   component: (inputQuerier: InputQuerier<{}>) => Node<{}, ValueType>;

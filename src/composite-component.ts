@@ -1,5 +1,5 @@
 import { InputQuerier, Node } from "./component.js";
-import { FrameKey, newFrameKey } from "./frame.js";
+import { FrameKey, newFrameKey } from "./frame-key.js";
 import { InstanceId } from "./instance-id";
 import { Frame, pop, push } from "./stack.js";
 import { Change, Query, ValueType } from "./value-type.js";
@@ -15,22 +15,18 @@ export type Instance<Inputs extends {}> = {
   inputs: Map<string, InstanceInput<Inputs>>;
 };
 
-// TODO: Rename this to Instance.
-type InternalInstance<Inputs extends {}> = {
-  instance: Instance<Inputs>;
-};
-
 type CompositeData = {
   [key: string]: {};
 };
 
 export class CompositeComponent<Inputs extends {}, O extends ValueType> {
-  private nodes: InternalInstance<Inputs>[] = [];
-  private nodesById: Map<number, number> = new Map;
+  private instances: Instance<Inputs>[];
+  private nodesById: Map<number, number>;
   private outputNodeId: InstanceId;
 
   constructor(instances: Instance<Inputs>[]) {
-    this.addInstances(instances);
+    this.instances = instances;
+    this.nodesById = new Map(instances.map((instance, i) => [instance.id, i]));
     this.outputNodeId = instances[instances.length - 1].id;
   }
 
@@ -38,14 +34,14 @@ export class CompositeComponent<Inputs extends {}, O extends ValueType> {
     const parent = this;
     interface ChildNode {
       node: Node<{}, ValueType>,
-      instance: InternalInstance<Inputs>,
+      instance: Instance<Inputs>,
       frameKey: FrameKey | undefined,
     }
-    const childNodes: ChildNode[] = this.nodes.map((node) => {
-      const childNode = node.instance.component(childInputQuerier(inputQuerier, node.instance.id));
+    const childNodes: ChildNode[] = this.instances.map((instance) => {
+      const childNode = instance.component(childInputQuerier(inputQuerier, instance.id));
       return {
         node: childNode,
-        instance: node,
+        instance,
         frameKey: childNode.construct === undefined ? undefined : newFrameKey(),
       };
     });
@@ -101,7 +97,7 @@ export class CompositeComponent<Inputs extends {}, O extends ValueType> {
 
           // Assemble the changes to pass to the child.
           const childChanges: {[key: string]: Change<ValueType>} = {};
-          for (const [argumentId, instanceInput] of child.instance.instance.inputs) {
+          for (const [argumentId, instanceInput] of child.instance.inputs) {
             if (instanceInput.type === 'input') {
               childChanges[argumentId] = changes[instanceInput.inputId] as Change<ValueType>;
             } else {
@@ -141,21 +137,9 @@ export class CompositeComponent<Inputs extends {}, O extends ValueType> {
     return outputNodeIndex;
   }
 
-  private addInstances(instances: Instance<Inputs>[]) {
-    for (const instance of instances) {
-      const nodeIndex = this.nodes.length;
-
-      this.nodes.push({
-        instance,
-      });
-
-      this.nodesById.set(instance.id, nodeIndex);
-    }
-  }
-
-  private nodeById(instanceId: InstanceId): InternalInstance<Inputs> {
+  private nodeById(instanceId: InstanceId): Instance<Inputs> {
     const inputNodeIndex = this.nodeIndexById(instanceId);
-    const inputNode = this.nodes[inputNodeIndex];
+    const inputNode = this.instances[inputNodeIndex];
     return inputNode;
   }
 
@@ -167,8 +151,8 @@ export class CompositeComponent<Inputs extends {}, O extends ValueType> {
     return inputNodeIndex;
   }
 
-  private instanceInputForNode(node: InternalInstance<Inputs>, inputKey: string) {
-    const instanceInput = node.instance.inputs.get(inputKey);
+  private instanceInputForNode(node: Instance<Inputs>, inputKey: string) {
+    const instanceInput = node.inputs.get(inputKey);
     if (instanceInput === undefined) {
       throw `Unexpected input key ${inputKey}`;
     }

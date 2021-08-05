@@ -19,7 +19,7 @@ type CompositeData = {
   [key: string]: {};
 };
 
-export class CompositeComponent<Inputs extends {}, O extends ValueType> {
+export class Composite<Inputs extends {}, O extends ValueType> {
   private instances: Instance<Inputs>[];
   private nodesById: Map<number, number>;
   private outputNodeId: InstanceId;

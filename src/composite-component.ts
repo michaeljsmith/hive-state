@@ -18,7 +18,6 @@ export type Instance<Inputs extends {}> = {
 // TODO: Rename this to Instance.
 type InternalInstance<Inputs extends {}> = {
   instance: Instance<Inputs>;
-  frameKey: FrameKey | undefined;
 };
 
 type CompositeData = {
@@ -40,11 +39,16 @@ export class CompositeComponent<Inputs extends {}, O extends ValueType> {
     interface ChildNode {
       node: Node<{}, ValueType>,
       instance: InternalInstance<Inputs>,
+      frameKey: FrameKey | undefined,
     }
-    const childNodes: ChildNode[] = this.nodes.map((node) => ({
-      node: node.instance.component(childInputQuerier(inputQuerier, node.instance.id)),
-      instance: node,
-    }));
+    const childNodes: ChildNode[] = this.nodes.map((node) => {
+      const childNode = node.instance.component(childInputQuerier(inputQuerier, node.instance.id));
+      return {
+        node: childNode,
+        instance: node,
+        frameKey: childNode.construct === undefined ? undefined : newFrameKey(),
+      };
+    });
 
     function childInputQuerier(parentInputQuerier: InputQuerier<Inputs>, instanceId: InstanceId): InputQuerier<{}> {
       const node = parent.nodeById(instanceId);
@@ -66,7 +70,7 @@ export class CompositeComponent<Inputs extends {}, O extends ValueType> {
 
     function dataForNode(stack: Frame, inputNode: ChildNode): {} | undefined {
       const compositeData = stack.value as CompositeData;
-      return inputNode.instance.frameKey === undefined ? undefined : compositeData[inputNode.instance.frameKey];
+      return inputNode.frameKey === undefined ? undefined : compositeData[inputNode.frameKey];
     }
   
     return {
@@ -74,8 +78,8 @@ export class CompositeComponent<Inputs extends {}, O extends ValueType> {
         const self: CompositeData = {};
         const newStack = push(stack, self);
         for (const child of childNodes) {
-          if (child.instance.frameKey !== undefined && child.node.construct !== undefined) {
-            self[child.instance.frameKey] = child.node.construct(newStack);
+          if (child.frameKey !== undefined && child.node.construct !== undefined) {
+            self[child.frameKey] = child.node.construct(newStack);
           }
         }
         return self;
@@ -110,7 +114,7 @@ export class CompositeComponent<Inputs extends {}, O extends ValueType> {
           }
 
           // Update the child node.
-          const childSelf = child.instance.frameKey === undefined ? undefined : selfData[child.instance.frameKey];
+          const childSelf = child.frameKey === undefined ? undefined : selfData[child.frameKey];
           changeForNode[i] = child.node.update(childSelf, newStack, childChanges);
         }
 
@@ -123,7 +127,7 @@ export class CompositeComponent<Inputs extends {}, O extends ValueType> {
         const outputNodeIndex = parent.outputNodeIndex();
         const outputNode = childNodes[outputNodeIndex];
         const selfData = self as CompositeData;
-        const childSelf = outputNode.instance.frameKey === undefined ? undefined : selfData[outputNode.instance.frameKey];
+        const childSelf = outputNode.frameKey === undefined ? undefined : selfData[outputNode.frameKey];
         return outputNode.node.query(childSelf, push(stack, self), query);
       },
     };
@@ -141,12 +145,8 @@ export class CompositeComponent<Inputs extends {}, O extends ValueType> {
     for (const instance of instances) {
       const nodeIndex = this.nodes.length;
 
-      // Allocate a frame key if this component requires state.
-      const frameKey = instance.component.construct === undefined ? undefined : newFrameKey();
-
       this.nodes.push({
         instance,
-        frameKey,
       });
 
       this.nodesById.set(instance.id, nodeIndex);

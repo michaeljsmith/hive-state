@@ -5,14 +5,14 @@ import { InstanceId } from "./instance-id";
 import { Frame, pop, push } from "./stack.js";
 import { Change, Query, ValueType } from "./value-type.js";
 
-export type InstanceInput<Inputs extends {}> =
-  { type: 'input', inputId: keyof Inputs } |
+export type InstanceInput =
+  { type: 'input', inputId: string } |
   { type: 'instance', instanceId: InstanceId };
 
-export type Instance<Inputs extends {}> = {
+export type Instance = {
   id: InstanceId;
   nodeFactory: NodeFactory<{}, ValueType>;
-  inputs: Map<string, InstanceInput<Inputs>>;
+  inputs: Map<string, InstanceInput>;
 };
 
 type CompositeData = {
@@ -20,11 +20,11 @@ type CompositeData = {
 };
 
 export class Composite<Inputs extends {}, O extends ValueType> {
-  private instances: Instance<Inputs>[];
+  private instances: Instance[];
   private nodesById: Map<number, number>;
   private outputNodeId: InstanceId;
 
-  constructor(instances: Instance<Inputs>[]) {
+  constructor(instances: Instance[]) {
     this.instances = instances;
     this.nodesById = new Map(instances.map((instance, i) => [instance.id, i]));
     this.outputNodeId = instances[instances.length - 1].id;
@@ -34,7 +34,7 @@ export class Composite<Inputs extends {}, O extends ValueType> {
     const parent = this;
     interface ChildNode {
       node: Node<{}, ValueType>,
-      instance: Instance<Inputs>,
+      instance: Instance,
       frameKey: FrameKey | undefined,
     }
     const childNodes: ChildNode[] = this.instances.map((instance) => {
@@ -54,7 +54,7 @@ export class Composite<Inputs extends {}, O extends ValueType> {
           query: Query<ValueType, R>): R => {
         const instanceInput = parent.instanceInputForNode(node, inputKey);
         if (instanceInput.type === 'input') {
-          return parentInputQuerier(pop(stack), instanceInput.inputId, query as any);
+          return parentInputQuerier(pop(stack), instanceInput.inputId as keyof Inputs, query as any);
         } else {
           const inputNodeIndex = parent.nodeIndexById(instanceInput.instanceId);
           const inputNode = childNodes[inputNodeIndex];
@@ -99,7 +99,7 @@ export class Composite<Inputs extends {}, O extends ValueType> {
           const childChanges: {[key: string]: Change<ValueType>} = {};
           for (const [argumentId, instanceInput] of child.instance.inputs) {
             if (instanceInput.type === 'input') {
-              childChanges[argumentId] = changes[instanceInput.inputId] as Change<ValueType>;
+              childChanges[argumentId] = changes[instanceInput.inputId as keyof Inputs] as Change<ValueType>;
             } else {
               const inputNodeIndex = parent.nodeIndexById(instanceInput.instanceId);
               if (inputNodeIndex >= i) {
@@ -137,7 +137,7 @@ export class Composite<Inputs extends {}, O extends ValueType> {
     return outputNodeIndex;
   }
 
-  private nodeById(instanceId: InstanceId): Instance<Inputs> {
+  private nodeById(instanceId: InstanceId): Instance {
     const inputNodeIndex = this.nodeIndexById(instanceId);
     const inputNode = this.instances[inputNodeIndex];
     return inputNode;
@@ -151,7 +151,7 @@ export class Composite<Inputs extends {}, O extends ValueType> {
     return inputNodeIndex;
   }
 
-  private instanceInputForNode(node: Instance<Inputs>, inputKey: string) {
+  private instanceInputForNode(node: Instance, inputKey: string) {
     const instanceInput = node.inputs.get(inputKey);
     if (instanceInput === undefined) {
       throw `Unexpected input key ${inputKey}`;

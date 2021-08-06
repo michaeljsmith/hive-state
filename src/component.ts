@@ -7,7 +7,7 @@ import { ValueType } from "./value-type.js";
 export interface Value<T extends ValueType> {
   __typeBrand: T;
   instanceSet: InstanceSet,
-  reference: InstanceInput<{}>,
+  reference: InstanceInput,
 }
 
 export function component<Args extends Value<ValueType>[], T extends ValueType>(
@@ -24,7 +24,7 @@ export function component<Args extends Value<ValueType>[], T extends ValueType>(
       instanceSet,
       reference: {type: 'input', inputId: i}
     };
-  }) as Args;
+  }) as unknown as Args;
 
   // Evaluate the body.
   // TODO: Do something with the return value of this function.

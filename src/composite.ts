@@ -1,5 +1,5 @@
 import { InputQuerier } from "./input-querier.js";
-import { Node } from "./node";
+import { Node, NodeFactory } from "./node";
 import { FrameKey, newFrameKey } from "./frame-key.js";
 import { InstanceId } from "./instance-id";
 import { Frame, pop, push } from "./stack.js";
@@ -11,7 +11,7 @@ export type InstanceInput<Inputs extends {}> =
 
 export type Instance<Inputs extends {}> = {
   id: InstanceId;
-  component: (inputQuerier: InputQuerier<{}>) => Node<{}, ValueType>;
+  nodeFactory: NodeFactory<{}, ValueType>;
   inputs: Map<string, InstanceInput<Inputs>>;
 };
 
@@ -38,7 +38,7 @@ export class Composite<Inputs extends {}, O extends ValueType> {
       frameKey: FrameKey | undefined,
     }
     const childNodes: ChildNode[] = this.instances.map((instance) => {
-      const childNode = instance.component(childInputQuerier(inputQuerier, instance.id));
+      const childNode = instance.nodeFactory(childInputQuerier(inputQuerier, instance.id));
       return {
         node: childNode,
         instance,

@@ -22,12 +22,12 @@ type CompositeData = {
 export class Composite<Inputs extends {}, O extends ValueType> {
   private instances: Instance[];
   private nodesById: Map<number, number>;
-  private outputNodeId: InstanceId;
+  private outputSpecifier: InstanceInput;
 
-  constructor(instances: Instance[]) {
+  constructor(instances: Instance[], outputSpecifier: InstanceInput) {
     this.instances = instances;
     this.nodesById = new Map(instances.map((instance, i) => [instance.id, i]));
-    this.outputNodeId = instances[instances.length - 1].id;
+    this.outputSpecifier = outputSpecifier;
   }
 
   createNode(inputQuerier: InputQuerier<Inputs>): Node<Inputs, O> {
@@ -53,15 +53,19 @@ export class Composite<Inputs extends {}, O extends ValueType> {
           inputKey: string,
           query: Query<ValueType, R>): R => {
         const instanceInput = parent.instanceInputForNode(node, inputKey);
-        if (instanceInput.type === 'input') {
-          return parentInputQuerier(pop(stack), instanceInput.inputId as keyof Inputs, query as any);
-        } else {
-          const inputNodeIndex = parent.nodeIndexById(instanceInput.instanceId);
-          const inputNode = childNodes[inputNodeIndex];
-          const inputSelf = dataForNode(stack, inputNode);
-          return inputNode.node.query(inputSelf, stack, query);
-        }
+        return childQuery(parentInputQuerier, instanceInput, stack, query);
       };
+    }
+
+    function childQuery<R>(parentInputQuerier: InputQuerier<Inputs>, instanceInput: InstanceInput, stack: Frame, query: Query<ValueType, R>): R {
+      if (instanceInput.type === 'input') {
+        return parentInputQuerier(pop(stack), instanceInput.inputId as keyof Inputs, query as any);
+      } else {
+        const inputNodeIndex = parent.nodeIndexById(instanceInput.instanceId);
+        const inputNode = childNodes[inputNodeIndex];
+        const inputSelf = dataForNode(stack, inputNode);
+        return inputNode.node.query(inputSelf, stack, query);
+      }
     }
 
     function dataForNode(stack: Frame, inputNode: ChildNode): {} | undefined {
@@ -115,26 +119,18 @@ export class Composite<Inputs extends {}, O extends ValueType> {
         }
 
         // Return the changes from the output node.
-        const outputNodeIndex = parent.outputNodeIndex();
-        return changeForNode[outputNodeIndex];
+        if (parent.outputSpecifier.type === 'input') {
+          return changes[parent.outputSpecifier.inputId as keyof Inputs] as Change<ValueType>;
+        } else {
+          const outputNodeIndex = parent.nodeIndexById(parent.outputSpecifier.instanceId);
+          return changeForNode[outputNodeIndex];
+        }
       },
 
       query<R>(self: unknown, stack: Frame, query: Query<O, R>): R {
-        const outputNodeIndex = parent.outputNodeIndex();
-        const outputNode = childNodes[outputNodeIndex];
-        const selfData = self as CompositeData;
-        const childSelf = outputNode.frameKey === undefined ? undefined : selfData[outputNode.frameKey];
-        return outputNode.node.query(childSelf, push(stack, self), query);
+        return childQuery(inputQuerier, parent.outputSpecifier, stack, query);
       },
     };
-  }
-
-  private outputNodeIndex() {
-    const outputNodeIndex = this.nodesById.get(this.outputNodeId);
-    if (outputNodeIndex === undefined) {
-      throw 'unknown output node';
-    }
-    return outputNodeIndex;
   }
 
   private nodeById(instanceId: InstanceId): Instance {

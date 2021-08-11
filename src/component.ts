@@ -14,7 +14,7 @@ export function component<Args extends Value<ValueType>[], T extends ValueType>(
     fn: (...args: Args) => Value<T>)
 : (...args: Args) => Value<T> {
 
-  const {result: _, instances} = inNewScope((scope) => {
+  const {result: resultValue, instances} = inNewScope((scope) => {
     // Create the arguments to pass to the body.
     const args = Array.from({length: fn.length}, (_, i) => {
       return {
@@ -24,14 +24,11 @@ export function component<Args extends Value<ValueType>[], T extends ValueType>(
     }) as unknown as Args;
 
     // Evaluate the body.
-    // TODO: Do something with the return value of this function.
-    // This should really be changing Composite so that the output node is
-    // explicitly specified (rather than implicitly being the last instance).
-    fn(...args);
+    return fn(...args);
   });
 
   // Create the composite node factory.
-  const composite = new Composite(instances);
+  const composite = new Composite(instances, resultValue.reference);
   const nodeFactory = (inputQuerier: InputQuerier<{}>) => composite.createNode(inputQuerier)
 
   // Return the node addition function.

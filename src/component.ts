@@ -1,20 +1,20 @@
 import { Composite, InstanceInput } from "./composite.js";
 import { InputQuerier } from "./input-querier.js";
 import { instance } from "./instance";
-import { inNewScope, Scope } from "./scope.js";
+import { BindingId, inNewScope, Scope } from "./scope.js";
 import { ValueType } from "./value-type.js";
 
 export interface Value<T extends ValueType> {
   __typeBrand: T;
   scope: Scope,
-  reference: InstanceInput,
+  reference: BindingId,
 }
 
 export function component<Args extends Value<ValueType>[], T extends ValueType>(
     fn: (...args: Args) => Value<T>)
 : (...args: Args) => Value<T> {
 
-  const {result: resultValue, instances} = inNewScope((scope) => {
+  const {result, scope} = inNewScope((scope) => {
     // Create the arguments to pass to the body.
     const args = Array.from({length: fn.length}, (_, i) => {
       return {
@@ -28,7 +28,7 @@ export function component<Args extends Value<ValueType>[], T extends ValueType>(
   });
 
   // Create the composite node factory.
-  const composite = new Composite(instances, resultValue.reference);
+  const composite = new Composite(scope, result.reference);
   const nodeFactory = (inputQuerier: InputQuerier<{}>) => composite.createNode(inputQuerier)
 
   // Return the node addition function.

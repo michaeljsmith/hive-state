@@ -4,6 +4,7 @@ import { FrameKey, newFrameKey } from "./frame-key.js";
 import { InstanceId } from "./instance-id";
 import { Frame, pop, push } from "./stack.js";
 import { Change, Query, ValueType } from "./value-type.js";
+import { BindingId, lookupBinding, Scope } from "./scope.js";
 
 export type InstanceInput =
   { type: 'input', inputId: string } |
@@ -12,7 +13,7 @@ export type InstanceInput =
 export type Instance = {
   id: InstanceId;
   nodeFactory: NodeFactory<{}, ValueType>;
-  inputs: Map<string, InstanceInput>;
+  inputs: Map<string, BindingId>;
 };
 
 type CompositeData = {
@@ -22,12 +23,14 @@ type CompositeData = {
 export class Composite<Inputs extends {}, O extends ValueType> {
   private instances: Instance[];
   private nodesById: Map<number, number>;
-  private outputSpecifier: InstanceInput;
+  private outputSpecifier: BindingId;
+  private scope: Scope;
 
-  constructor(instances: Instance[], outputSpecifier: InstanceInput) {
-    this.instances = instances;
-    this.nodesById = new Map(instances.map((instance, i) => [instance.id, i]));
+  constructor(scope: Scope, outputSpecifier: BindingId) {
+    this.instances = scope.instances;
+    this.nodesById = new Map(scope.instances.map((instance, i) => [instance.id, i]));
     this.outputSpecifier = outputSpecifier;
+    this.scope = scope;
   }
 
   createNode(inputQuerier: InputQuerier<Inputs>): Node<Inputs, O> {
@@ -52,12 +55,13 @@ export class Composite<Inputs extends {}, O extends ValueType> {
           stack: Frame,
           inputKey: string,
           query: Query<ValueType, R>): R => {
-        const instanceInput = parent.instanceInputForNode(node, inputKey);
-        return childQuery(parentInputQuerier, instanceInput, stack, query);
+        const inputBinding = parent.inputBindingForNode(node, inputKey);
+        return childQuery(parentInputQuerier, inputBinding, stack, query);
       };
     }
 
-    function childQuery<R>(parentInputQuerier: InputQuerier<Inputs>, instanceInput: InstanceInput, stack: Frame, query: Query<ValueType, R>): R {
+    function childQuery<R>(parentInputQuerier: InputQuerier<Inputs>, bindingId: BindingId, stack: Frame, query: Query<ValueType, R>): R {
+      const instanceInput = lookupBinding(parent.scope, bindingId);
       if (instanceInput.type === 'input') {
         return parentInputQuerier(pop(stack), instanceInput.inputId as keyof Inputs, query as any);
       } else {
@@ -101,7 +105,8 @@ export class Composite<Inputs extends {}, O extends ValueType> {
 
           // Assemble the changes to pass to the child.
           const childChanges: {[key: string]: Change<ValueType>} = {};
-          for (const [argumentId, instanceInput] of child.instance.inputs) {
+          for (const [argumentId, bindingId] of child.instance.inputs) {
+            const instanceInput = lookupBinding(parent.scope, bindingId);
             if (instanceInput.type === 'input') {
               childChanges[argumentId] = changes[instanceInput.inputId as keyof Inputs] as Change<ValueType>;
             } else {
@@ -119,10 +124,11 @@ export class Composite<Inputs extends {}, O extends ValueType> {
         }
 
         // Return the changes from the output node.
-        if (parent.outputSpecifier.type === 'input') {
-          return changes[parent.outputSpecifier.inputId as keyof Inputs] as Change<ValueType>;
+        const output = lookupBinding(parent.scope, parent.outputSpecifier);
+        if (output.type === 'input') {
+          return changes[output.inputId as keyof Inputs] as Change<ValueType>;
         } else {
-          const outputNodeIndex = parent.nodeIndexById(parent.outputSpecifier.instanceId);
+          const outputNodeIndex = parent.nodeIndexById(output.instanceId);
           return changeForNode[outputNodeIndex];
         }
       },
@@ -147,11 +153,11 @@ export class Composite<Inputs extends {}, O extends ValueType> {
     return inputNodeIndex;
   }
 
-  private instanceInputForNode(node: Instance, inputKey: string) {
-    const instanceInput = node.inputs.get(inputKey);
-    if (instanceInput === undefined) {
+  private inputBindingForNode(node: Instance, inputKey: string): BindingId {
+    const inputBinding = node.inputs.get(inputKey);
+    if (inputBinding === undefined) {
       throw `Unexpected input key ${inputKey}`;
     }
-    return instanceInput;
+    return inputBinding;
   }
 }

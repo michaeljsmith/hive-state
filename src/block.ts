@@ -5,7 +5,7 @@ import { Node } from "./node.js";
 export interface Block {
   encloser: Block;
   caller: ApplyNode;
-  getNode(nodeId: NodeId): Node | undefined;
+  nodes: Map<NodeId, Node>;
   nodeOrder: NodeId[];
   outputNodeId: NodeId;
 }
@@ -17,7 +17,7 @@ export interface BlockData {
 }
 
 export function getLocalNode(block: Block, nodeId: NodeId): Node {
-  const localNode = block.getNode(nodeId);
+  const localNode = block.nodes.get(nodeId);
   if (localNode === undefined) {
     throw 'Node not found';
   }
@@ -30,7 +30,7 @@ export function visitNode<R>(
     nodeId: NodeId,
     visitor: (node: Node, nodeData: {} | undefined, blockData: BlockData | undefined) => R)
 : R {
-  const localNode = block.getNode(nodeId);
+  const localNode = block.nodes.get(nodeId);
 
   // If the node isn't defined here, check the parent.
   if (localNode === undefined) {

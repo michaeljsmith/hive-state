@@ -41,7 +41,7 @@ export function visitNode<R>(
   // If this is an argument node, recurse to the caller.
   if (localNode.type === 'argument') {
     const callerNodeId = block.caller.getArgument(localNode.argumentId);
-    return visitNode(block.caller.parent, blockData?.caller?.block, callerNodeId, visitor);
+    return visitNode(block.caller.parent, blockData?.caller?.parent, callerNodeId, visitor);
   }
 
   // Otherwise, we have found our node.

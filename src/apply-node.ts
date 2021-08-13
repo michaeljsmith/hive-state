@@ -12,5 +12,6 @@ export interface ApplyNode extends BaseNode {
 // TODO: Do we really need this? Can we just attach the blockdata directly
 // when constructing child blocks?
 export interface ApplyData {
+  parent: BlockData;
   block: BlockData;
 }

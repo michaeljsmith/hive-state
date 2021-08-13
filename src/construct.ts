@@ -61,6 +61,7 @@ function constructApplyNode(node: ApplyNode, parent: BlockData): ApplyData {
   // Unfortunately there's no straightforward way to express this promise to
   // Typescript, so we need to do a cast.
   const data: ApplyData = {} as ApplyData;
+  data.parent = parent;
   const blockData = constructBlock(lambdaNode.block, encloser, data);
   data.block = blockData;
   return data;

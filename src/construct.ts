@@ -15,11 +15,7 @@ class BlockDataImpl implements BlockData {
   }
 
   getNode(nodeId: NodeId): {} {
-    const data = this.nodeData[nodeId];
-    if (data === undefined) {
-      throw 'Node data undefined';
-    }
-    return data;
+    return this.nodeData[nodeId];
   }
 
   setNode(nodeId: NodeId, data: {}) {

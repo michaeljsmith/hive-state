@@ -13,7 +13,7 @@ export interface Block {
 export interface BlockData {
   encloser: BlockData;
   caller: ApplyData;
-  getNode(nodeId: NodeId): {};
+  getNode(nodeId: NodeId): {} | undefined;
 }
 
 export function getLocalNode(block: Block, nodeId: NodeId): Node {
@@ -24,40 +24,48 @@ export function getLocalNode(block: Block, nodeId: NodeId): Node {
   return localNode;
 }
 
-export function findNodeById(block: Block, nodeId: NodeId): Node {
+export function visitNode<R>(
+    block: Block,
+    blockData: BlockData | undefined,
+    nodeId: NodeId,
+    visitor: (node: Node, nodeData: {} | undefined, blockData: BlockData | undefined) => R)
+: R {
   const localNode = block.getNode(nodeId);
 
   // If the node isn't defined here, check the parent.
   if (localNode === undefined) {
     // TODO: Handle root.
-    return findNodeById(block.encloser, nodeId);
+    return visitNode(block.encloser, blockData?.encloser, nodeId, visitor);
   }
 
   // If this is an argument node, recurse to the caller.
   if (localNode.type === 'argument') {
     const callerNodeId = block.caller.getArgument(localNode.argumentId);
-    return findNodeById(block.caller.parent, callerNodeId);
+    return visitNode(block.caller.parent, blockData?.caller?.block, callerNodeId, visitor);
   }
 
-  // Otherwise we have found our node.
-  return localNode;
+  // Otherwise, we have found our node.
+  return visitor(localNode, blockData?.getNode(nodeId), blockData);
+}
+
+export function visitNodeWithData<R>(
+    block: Block,
+    blockData: BlockData,
+    nodeId: NodeId,
+    visitor: (node: Node, nodeData: {} | undefined, blockData: BlockData) => R)
+: R {
+  return visitNode(block, blockData, nodeId, (node, nodeData, blockData) => {
+    if (blockData === undefined) {
+      throw 'missing blockData';
+    }
+    return visitor(node, nodeData, blockData);
+  });
+}
+
+export function findNodeById(block: Block, nodeId: NodeId): Node {
+  return visitNode(block, undefined, nodeId, (node) => node);
 }
 
 export function findNodeParentDataById(block: Block, blockData: BlockData, nodeId: NodeId): BlockData {
-  const localNode = block.getNode(nodeId);
-
-  // If the node isn't defined here, check the parent.
-  if (localNode === undefined) {
-    // TODO: Handle root.
-    return findNodeParentDataById(block.encloser, blockData.encloser, nodeId);
-  }
-
-  // If this is an argument node, recurse to the caller.
-  if (localNode.type === 'argument') {
-    const callerNodeId = block.caller.getArgument(localNode.argumentId);
-    return findNodeParentDataById(block.caller.parent, blockData.caller.block, callerNodeId);
-  }
-
-  // Otherwise we have found our node (or at least its parent, which we are after).
-  return blockData;
+  return visitNodeWithData(block, blockData, nodeId, (_node, _nodeData, blockData) => blockData);
 }

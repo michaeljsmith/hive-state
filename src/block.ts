@@ -13,7 +13,7 @@ export interface Block {
 export interface BlockData {
   encloser: BlockData;
   caller: ApplyData;
-  getNode(nodeId: NodeId): {} | undefined;
+  nodes: Map<NodeId, {}>;
 }
 
 export function getLocalNode(block: Block, nodeId: NodeId): Node {
@@ -45,7 +45,7 @@ export function visitNode<R>(
   }
 
   // Otherwise, we have found our node.
-  return visitor(localNode, blockData?.getNode(nodeId), blockData);
+  return visitor(localNode, blockData?.nodes?.get(nodeId), blockData);
 }
 
 export function visitNodeWithData<R>(

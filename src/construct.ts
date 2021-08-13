@@ -4,32 +4,36 @@ import { LambdaNode } from "./lambda-node.js";
 import { NodeId } from "./node-id.js";
 import { Node } from "./node.js";
 
-class BlockDataImpl implements BlockData {
-  encloser: BlockData;
-  caller: ApplyData;
-  nodeData: {[key: string]: {}} = {};
+// class BlockDataImpl implements BlockData {
+//   encloser: BlockData;
+//   caller: ApplyData;
+//   nodeData: {[key: string]: {}} = {};
 
-  constructor(encloser: BlockData, caller: ApplyData) {
-    this.encloser = encloser;
-    this.caller = caller;
-  }
+//   constructor(encloser: BlockData, caller: ApplyData) {
+//     this.encloser = encloser;
+//     this.caller = caller;
+//   }
 
-  getNode(nodeId: NodeId): {} {
-    return this.nodeData[nodeId];
-  }
+//   getNode(nodeId: NodeId): {} {
+//     return this.nodeData[nodeId];
+//   }
 
-  setNode(nodeId: NodeId, data: {}) {
-    this.nodeData[nodeId] = data;
-  }
-}
+//   setNode(nodeId: NodeId, data: {}) {
+//     this.nodeData[nodeId] = data;
+//   }
+// }
 
 export function constructBlock(block: Block, encloser: BlockData, caller: ApplyData): BlockData {
-  const data = new BlockDataImpl(encloser, caller);
+  const data: BlockData = {
+    encloser,
+    caller,
+    nodes: new Map(),
+  };
   for (const nodeId of block.nodeOrder) {
     const node = getLocalNode(block, nodeId);
     const nodeData = constructNode(node, data);
     if (nodeData !== undefined) {
-      data.setNode(node.nodeId, nodeData);
+      data.nodes.set(node.nodeId, nodeData);
     }
   }
   return data;

@@ -1,4 +1,4 @@
-import { ApplyData, ApplyNode } from "./apply-node.js";
+import { ApplyData, ApplyNode, getApplyNodeArgument } from "./apply-node.js";
 import { NodeId } from "./node-id.js";
 import { Node } from "./node.js";
 
@@ -40,7 +40,7 @@ export function visitNode<R>(
 
   // If this is an argument node, recurse to the caller.
   if (localNode.type === 'argument') {
-    const callerNodeId = block.caller.getArgument(localNode.argumentId);
+    const callerNodeId = getApplyNodeArgument(block.caller, localNode.argumentId);
     return visitNode(block.caller.parent, blockData?.caller?.parent, callerNodeId, visitor);
   }
 

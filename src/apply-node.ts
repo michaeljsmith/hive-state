@@ -6,7 +6,7 @@ import { ArgumentId } from "./argument-id.js";
 export interface ApplyNode extends BaseNode {
   type: 'apply';
   lambda: NodeId;
-  getArgument(argumentId: ArgumentId): NodeId;
+  arguments: Map<ArgumentId, NodeId>;
 }
 
 // TODO: Do we really need this? Can we just attach the blockdata directly
@@ -14,4 +14,12 @@ export interface ApplyNode extends BaseNode {
 export interface ApplyData {
   parent: BlockData;
   block: BlockData;
+}
+
+export function getApplyNodeArgument(node: ApplyNode, argumentId: ArgumentId): NodeId {
+  const nodeId = node.arguments.get(argumentId);
+  if (nodeId === undefined) {
+    throw 'Invalid argument';
+  }
+  return nodeId;
 }

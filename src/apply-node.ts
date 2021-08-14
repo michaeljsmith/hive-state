@@ -1,7 +1,8 @@
 import { NodeId } from "./node-id.js";
 import { BaseNode } from "./base-node";
-import { BlockData } from "./block.js";
+import { Block, BlockData, findNodeById } from "./block.js";
 import { ArgumentId } from "./argument-id.js";
+import { LambdaNode } from "./lambda-node.js";
 
 export interface ApplyNode extends BaseNode {
   type: 'apply';
@@ -23,3 +24,13 @@ export function getApplyNodeArgument(node: ApplyNode, argumentId: ArgumentId): N
   }
   return nodeId;
 }
+
+export function getApplyNodeBlock(node: ApplyNode): Block {
+  const lambdaNode = findNodeById(node.parent, node.lambda) as LambdaNode;
+  if (lambdaNode.type !== 'lambda') {
+    throw 'Wrong node type';
+  }
+  const lambdaBlock = lambdaNode.block;
+  return lambdaBlock;
+}
+

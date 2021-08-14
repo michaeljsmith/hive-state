@@ -1,4 +1,4 @@
-import { ApplyData, ApplyNode } from "./apply-node.js";
+import { ApplyData, ApplyNode, getApplyNodeBlock } from "./apply-node.js";
 import { Block, BlockData, findNodeById, findNodeParentDataById, getLocalNode } from "./block.js";
 import { LambdaNode } from "./lambda-node.js";
 import { NodeId } from "./node-id.js";
@@ -50,11 +50,7 @@ function constructNode(node: Node, parent: BlockData): {} | undefined {
 }
 
 function constructApplyNode(node: ApplyNode, parent: BlockData): ApplyData {
-  const lambdaNode = findNodeById(node.parent, node.lambda) as LambdaNode;
-  if (lambdaNode.type !== 'lambda') {
-    throw 'Wrong node type';
-  }
-
+  const lambdaBlock = getApplyNodeBlock(node);
   const encloser = findNodeParentDataById(node.parent, parent, node.lambda) as BlockData;
 
   // We need to construct the new block, passing in the object we are
@@ -66,7 +62,7 @@ function constructApplyNode(node: ApplyNode, parent: BlockData): ApplyData {
   // Typescript, so we need to do a cast.
   const data: ApplyData = {} as ApplyData;
   data.parent = parent;
-  const blockData = constructBlock(lambdaNode.block, encloser, data);
+  const blockData = constructBlock(lambdaBlock, encloser, data);
   data.block = blockData;
   return data;
 }

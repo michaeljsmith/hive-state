@@ -1,27 +1,6 @@
 import { ApplyData, ApplyNode, getApplyNodeBlock } from "./apply-node.js";
-import { Block, BlockData, findNodeById, findNodeParentDataById, getLocalNode } from "./block.js";
-import { LambdaNode } from "./lambda-node.js";
-import { NodeId } from "./node-id.js";
+import { Block, BlockData, findNodeParentDataById, getLocalNode } from "./block.js";
 import { Node } from "./node.js";
-
-// class BlockDataImpl implements BlockData {
-//   encloser: BlockData;
-//   caller: ApplyData;
-//   nodeData: {[key: string]: {}} = {};
-
-//   constructor(encloser: BlockData, caller: ApplyData) {
-//     this.encloser = encloser;
-//     this.caller = caller;
-//   }
-
-//   getNode(nodeId: NodeId): {} {
-//     return this.nodeData[nodeId];
-//   }
-
-//   setNode(nodeId: NodeId, data: {}) {
-//     this.nodeData[nodeId] = data;
-//   }
-// }
 
 export function constructBlock(block: Block, encloser: BlockData, caller: ApplyData): BlockData {
   const data: BlockData = {

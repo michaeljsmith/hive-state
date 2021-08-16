@@ -2,7 +2,7 @@ import { ApplyData, ApplyNode } from "./apply-node.js";
 import { Block, BlockData, getLocalNode } from "./block.js";
 import { NodeContextData } from "./node-context.js";
 import { Node } from "./node.js";
-import { queryNodeData } from "./query-argument.js";
+import { queryNode } from "./query-argument.js";
 
 export function constructBlock(block: Block, encloser: BlockData, caller: NodeContextData): BlockData {
   const data: BlockData = {
@@ -31,7 +31,7 @@ function constructNode(node: Node, parent: BlockData): {} | undefined {
 }
 
 function constructApplyNode(node: ApplyNode, parent: BlockData): ApplyData {
-  const encloserData = queryNodeData(node.parent, parent, node.lambda, (input) => input as BlockData);
+  const encloserData = queryNode(node.parent, parent, node.lambda, (input) => input as BlockData);
 
   // We need to construct the new block, passing in the object we are
   // constructing as a parameter. This is potentially unsafe, since the value

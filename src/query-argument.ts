@@ -4,7 +4,7 @@ import { Block, BlockData } from "./block.js";
 import { NodeId } from "./node-id.js";
 import { Query } from "./query.js";
 
-export function queryArgumentData<R>(
+export function queryArgument<R>(
     block: Block,
     blockData: BlockData,
     nodeId: NodeId,
@@ -14,10 +14,10 @@ export function queryArgumentData<R>(
   const node = block.nodes.get(nodeId);
   if (node === undefined) {
     // Node not defined here - check the enclosing scope.
-    return queryArgumentData(block.encloser, blockData.encloser, nodeId, argumentId, query);
+    return queryArgument(block.encloser, blockData.encloser, nodeId, argumentId, query);
   } else if (node.type === 'apply') {
     const argumentNodeId = getApplyNodeArgument(node, argumentId);
-    return queryNodeData(block, blockData, argumentNodeId, query);
+    return queryNode(block, blockData, argumentNodeId, query);
   } else if (node.type === 'argument' || node.type === 'lambda') {
     throw 'node has no arguments';
   } else {
@@ -26,7 +26,7 @@ export function queryArgumentData<R>(
   }
 }
 
-export function queryNodeData<R>(
+export function queryNode<R>(
     block: Block,
     blockData: BlockData,
     nodeId: NodeId,
@@ -35,7 +35,7 @@ export function queryNodeData<R>(
   const node = block.nodes.get(nodeId);
   if (node === undefined) {
     // Node not defined here - check the enclosing scope.
-    return queryNodeData(block.encloser, blockData.encloser, nodeId, query);
+    return queryNode(block.encloser, blockData.encloser, nodeId, query);
   } else if (node.type === 'argument') {
     // Recurse to the caller
     return block.caller.queryArgument(blockData.caller, node.argumentId, query);
@@ -46,7 +46,7 @@ export function queryNodeData<R>(
   } else if (node.type === 'apply') {
     // Recurse to the apply block.
     const childData = getApplyNodeBlockData(node, blockData);
-    return queryNodeData(node.block, childData, node.block.outputNodeId, query);
+    return queryNode(node.block, childData, node.block.outputNodeId, query);
   } else {
     const _exhaustiveCheck: never = node;
     throw 'unexpected type';

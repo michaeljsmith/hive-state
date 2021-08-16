@@ -21,8 +21,7 @@ export function queryArgument<R>(
   } else if (node.type === 'argument' || node.type === 'lambda') {
     throw 'node has no arguments';
   } else {
-    const _exhaustiveCheck: never = node;
-    throw 'unexpected type';
+    ((_: never) => {throw 'unexpected type';})(node);
   }
 }
 
@@ -48,7 +47,6 @@ export function queryNode<R>(
     const childData = getApplyNodeBlockData(node, blockData);
     return queryNode(node.block, childData, node.block.outputNodeId, query);
   } else {
-    const _exhaustiveCheck: never = node;
-    throw 'unexpected type';
+    ((_: never) => {throw 'unexpected type';})(node);
   }
 }

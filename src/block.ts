@@ -1,10 +1,10 @@
-import { ApplyData, ApplyNode } from "./apply-node.js";
+import { NodeContext, NodeContextData } from "./node-context.js";
 import { NodeId } from "./node-id.js";
 import { Node } from "./node.js";
 
 export interface Block {
   encloser: Block;
-  caller: ApplyNode;
+  caller: NodeContext;
   nodes: Map<NodeId, Node>;
   nodeOrder: NodeId[];
   outputNodeId: NodeId;
@@ -12,7 +12,7 @@ export interface Block {
 
 export interface BlockData {
   encloser: BlockData;
-  caller: ApplyData;
+  caller: NodeContextData;
   nodes: Map<NodeId, {}>;
 }
 

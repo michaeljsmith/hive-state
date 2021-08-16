@@ -1,9 +1,10 @@
 import { ApplyData, ApplyNode } from "./apply-node.js";
 import { Block, BlockData, getLocalNode } from "./block.js";
+import { NodeContextData } from "./node-context.js";
 import { Node } from "./node.js";
 import { queryNodeData } from "./query-argument.js";
 
-export function constructBlock(block: Block, encloser: BlockData, caller: ApplyData): BlockData {
+export function constructBlock(block: Block, encloser: BlockData, caller: NodeContextData): BlockData {
   const data: BlockData = {
     encloser,
     caller,
@@ -39,9 +40,10 @@ function constructApplyNode(node: ApplyNode, parent: BlockData): ApplyData {
   //
   // Unfortunately there's no straightforward way to express this promise to
   // Typescript, so we need to do a cast.
-  const data: ApplyData = {} as ApplyData;
+  const data = {} as ApplyData;
+  const context = {context: data};
   data.parent = parent;
-  const blockData = constructBlock(node.block, encloserData, data);
+  const blockData = constructBlock(node.block, encloserData, context);
   data.block = blockData;
   return data;
 }

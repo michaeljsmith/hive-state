@@ -38,7 +38,7 @@ export function queryNodeData<R>(
     return queryNodeData(block.encloser, blockData.encloser, nodeId, query);
   } else if (node.type === 'argument') {
     // Recurse to the caller
-    return queryArgumentData(block.caller.parent, blockData.caller.parent, block.caller.nodeId, node.argumentId, query);
+    return block.caller.queryArgument(blockData.caller, node.argumentId, query);
   } else if (node.type === 'lambda') {
     // Apply the query - consider the data to be the block data, since that
     // is the only relevant data for a lambda.

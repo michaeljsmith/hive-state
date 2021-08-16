@@ -31,7 +31,7 @@ export function propagateNodeChange(
 
   // Recurse to caller block.
   if (outputChange !== undefined) {
-    propagateNodeChange(block.caller.parent, blockData.caller.parent, block.caller.nodeId, outputChange);
+    block.caller.handleOutputChange(blockData.caller, outputChange);
   }
 }
 

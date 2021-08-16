@@ -1,6 +1,7 @@
-import { ApplyData, ApplyNode, getApplyNodeBlock } from "./apply-node.js";
-import { Block, BlockData, findNodeParentDataById, getLocalNode } from "./block.js";
+import { ApplyData, ApplyNode } from "./apply-node.js";
+import { Block, BlockData, getLocalNode } from "./block.js";
 import { Node } from "./node.js";
+import { queryNodeData } from "./query-argument.js";
 
 export function constructBlock(block: Block, encloser: BlockData, caller: ApplyData): BlockData {
   const data: BlockData = {
@@ -29,8 +30,7 @@ function constructNode(node: Node, parent: BlockData): {} | undefined {
 }
 
 function constructApplyNode(node: ApplyNode, parent: BlockData): ApplyData {
-  const lambdaBlock = getApplyNodeBlock(node);
-  const encloser = findNodeParentDataById(node.parent, parent, node.lambda) as BlockData;
+  const encloserData = queryNodeData(node.parent, parent, node.lambda, (input) => input as BlockData);
 
   // We need to construct the new block, passing in the object we are
   // constructing as a parameter. This is potentially unsafe, since the value
@@ -41,7 +41,7 @@ function constructApplyNode(node: ApplyNode, parent: BlockData): ApplyData {
   // Typescript, so we need to do a cast.
   const data: ApplyData = {} as ApplyData;
   data.parent = parent;
-  const blockData = constructBlock(lambdaBlock, encloser, data);
+  const blockData = constructBlock(node.block, encloserData, data);
   data.block = blockData;
   return data;
 }

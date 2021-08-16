@@ -1,5 +1,5 @@
 import { NodeId } from "./node-id.js";
-import { Block } from "./block.js";
+import { Block, BlockData } from "./block.js";
 import { BaseNode } from "./base-node";
 import { brandAsChange, Change } from "./change.js";
 

@@ -1,4 +1,4 @@
-import { ApplyData, getApplyNodeBlock } from "./apply-node.js";
+import { ApplyData } from "./apply-node.js";
 import { ArgumentId } from "./argument-id.js";
 import { Block, BlockData, getLocalNode } from "./block.js";
 import { Change } from "./change.js";
@@ -69,7 +69,6 @@ function generalPropagateChanges(
       const encloserChanges = lambdaChange?.nodeChanges ?? new Map<NodeId, Change | undefined>();
 
       // Recurse to the apply block.
-      const applyBlock = getApplyNodeBlock(node);
       const applyData = blockData.nodes.get(nodeId) as ApplyData | undefined;
       if (applyData === undefined) {
         throw 'Missing node data';
@@ -77,7 +76,7 @@ function generalPropagateChanges(
       // TODO: Should we change so that node changes reference the encloser changes, rather than being a flat list?
       // This should work, but it is adding extra items to the end of the list that are still there the next time
       // the lambda is invoked so seems unsafe.
-      change = propagateChanges(applyBlock, applyData.block, argumentChanges, encloserChanges);
+      change = propagateChanges(node.block, applyData.block, argumentChanges, encloserChanges);
     }
 
     nodeChanges.set(nodeId, change);

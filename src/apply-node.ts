@@ -1,17 +1,15 @@
 import { NodeId } from "./node-id.js";
 import { BaseNode } from "./base-node";
-import { Block, BlockData, findNodeById } from "./block.js";
+import { Block, BlockData } from "./block.js";
 import { ArgumentId } from "./argument-id.js";
-import { LambdaNode } from "./lambda-node.js";
 
 export interface ApplyNode extends BaseNode {
   type: 'apply';
   lambda: NodeId;
+  block: Block;
   arguments: Map<ArgumentId, NodeId>;
 }
 
-// TODO: Do we really need this? Can we just attach the blockdata directly
-// when constructing child blocks?
 export interface ApplyData {
   parent: BlockData;
   block: BlockData;
@@ -25,12 +23,10 @@ export function getApplyNodeArgument(node: ApplyNode, argumentId: ArgumentId): N
   return nodeId;
 }
 
-export function getApplyNodeBlock(node: ApplyNode): Block {
-  const lambdaNode = findNodeById(node.parent, node.lambda) as LambdaNode;
-  if (lambdaNode.type !== 'lambda') {
-    throw 'Wrong node type';
+export function getApplyNodeBlockData(node: ApplyNode, blockData: BlockData): BlockData {
+  const applyData = blockData.nodes.get(node.nodeId) as ApplyData | undefined;
+  if (applyData === undefined) {
+    throw 'Missing node data';
   }
-  const lambdaBlock = lambdaNode.block;
-  return lambdaBlock;
+  return applyData.block;  
 }
-

@@ -23,3 +23,11 @@ export function getLocalNode(block: Block, nodeId: NodeId): Node {
   }
   return localNode;
 }
+
+export function getNodeData(node: Node, blockData: BlockData): {} {
+  const applyData = blockData.nodes.get(node.nodeId);
+  if (applyData === undefined) {
+    throw 'Missing node data';
+  }
+  return applyData;
+}

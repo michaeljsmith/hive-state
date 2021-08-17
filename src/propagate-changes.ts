@@ -1,4 +1,5 @@
 import { ArgumentId } from "./argument-id.js";
+import { BaseParametricData } from "./base-parametric-node.js";
 import { Block, BlockData, getLocalNode } from "./block.js";
 import { Change } from "./change.js";
 import { LambdaChange, lambdaChange } from "./lambda-node.js";
@@ -56,7 +57,7 @@ function generalPropagateChanges(
       // preceding nodes, so changes to later nodes will have no impact.
       // Therefore we can get away without copying.
       change = lambdaChange(nodeChanges);
-    } else {
+    } else if (node.type === 'apply') {
       // Assemble the argument changes.
       const argumentChanges = new Map<ArgumentId, Change | undefined>();
       for (const [argumentId, nodeId] of node.arguments) {
@@ -76,6 +77,16 @@ function generalPropagateChanges(
       // This should work, but it is adding extra items to the end of the list that are still there the next time
       // the lambda is invoked so seems unsafe.
       change = propagateChanges(node.block, applyData, argumentChanges, encloserChanges);
+    } else if (node.type === 'primitive') {
+      // Assemble the argument changes.
+      const argumentChanges = new Map<ArgumentId, Change | undefined>();
+      for (const [argumentId, nodeId] of node.arguments) {
+        argumentChanges.set(argumentId, nodeChanges.get(nodeId))
+      }
+
+      change = node.handleArgumentChanges(blockData.nodes.get(nodeId) as BaseParametricData | undefined, blockData, argumentChanges);
+    } else {
+      ((_: never) => { throw 'Unknown type'; })(node);
     }
 
     nodeChanges.set(nodeId, change);

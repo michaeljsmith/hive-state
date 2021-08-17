@@ -1,6 +1,6 @@
-import { getApplyNodeArgument, getApplyNodeBlockData } from "./apply-node.js";
 import { ArgumentId } from "./argument-id.js";
-import { Block, BlockData } from "./block.js";
+import { BaseParametricData, getParametricNodeArgument } from "./base-parametric-node.js";
+import { Block, BlockData, getNodeData } from "./block.js";
 import { NodeId } from "./node-id.js";
 import { Query } from "./query.js";
 
@@ -15,8 +15,8 @@ export function queryArgument<R>(
   if (node === undefined) {
     // Node not defined here - check the enclosing scope.
     return queryArgument(block.encloser, blockData.encloser, nodeId, argumentId, query);
-  } else if (node.type === 'apply') {
-    const argumentNodeId = getApplyNodeArgument(node, argumentId);
+  } else if (node.type === 'apply' || node.type === 'primitive') {
+    const argumentNodeId = getParametricNodeArgument(node, argumentId);
     return queryNode(block, blockData, argumentNodeId, query);
   } else if (node.type === 'argument' || node.type === 'lambda') {
     throw 'node has no arguments';
@@ -44,8 +44,12 @@ export function queryNode<R>(
     return query(blockData);
   } else if (node.type === 'apply') {
     // Recurse to the apply block.
-    const childData = getApplyNodeBlockData(node, blockData);
+    const childData = getNodeData(node, blockData) as BlockData;
     return queryNode(node.block, childData, node.block.outputNodeId, query);
+  } else if (node.type === 'primitive') {
+    // Recurse to the primitive block.
+    const childData = blockData.nodes.get(node.nodeId) as BaseParametricData | undefined;
+    return node.handleQuery(childData, blockData, query);
   } else {
     ((_: never) => {throw 'unexpected type';})(node);
   }

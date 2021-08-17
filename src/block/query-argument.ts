@@ -1,5 +1,5 @@
 import { ArgumentId } from "./argument-id.js";
-import { BaseParametricData, getParametricNodeArgument } from "./base-parametric-node.js";
+import { getParametricNodeArgument } from "./base-parametric-node.js";
 import { Block, BlockData, getNodeData } from "./block.js";
 import { NodeId } from "./node-id.js";
 import { Query } from "./query.js";
@@ -48,7 +48,7 @@ export function queryNode<R>(
     return queryNode(node.block, childData, node.block.outputNodeId, query);
   } else if (node.type === 'primitive') {
     // Recurse to the primitive block.
-    const childData = blockData.nodes.get(node.nodeId) as BaseParametricData | undefined;
+    const childData = blockData.nodes.get(node.nodeId);
     return node.handleQuery(childData, blockData, query);
   } else {
     ((_: never) => {throw 'unexpected type';})(node);

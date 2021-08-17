@@ -1,5 +1,4 @@
 import { ApplyNode } from "./apply-node.js";
-import { BaseParametricData } from "./base-parametric-node.js";
 import { Block, BlockData, getLocalNode } from "./block.js";
 import { NodeContextData } from "./node-context.js";
 import { Node } from "./node.js";
@@ -36,7 +35,7 @@ function constructNode(node: Node, parent: BlockData): {} | undefined {
   }
 }
 
-function constructPrimitiveNode(node: PrimitiveNode, parent: BlockData): BaseParametricData | undefined {
+function constructPrimitiveNode(node: PrimitiveNode, parent: BlockData): {} | undefined {
   return node.construct(parent);
 }
  

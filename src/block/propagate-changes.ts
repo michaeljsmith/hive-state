@@ -1,5 +1,4 @@
 import { ArgumentId } from "./argument-id.js";
-import { BaseParametricData } from "./base-parametric-node.js";
 import { Block, BlockData, getLocalNode } from "./block.js";
 import { Change } from "./change.js";
 import { LambdaChange, lambdaChange } from "./lambda-node.js";
@@ -84,7 +83,7 @@ function generalPropagateChanges(
         argumentChanges.set(argumentId, nodeChanges.get(nodeId))
       }
 
-      change = node.handleArgumentChanges(blockData.nodes.get(nodeId) as BaseParametricData | undefined, blockData, argumentChanges);
+      change = node.handleArgumentChanges(blockData.nodes.get(nodeId), blockData, argumentChanges);
     } else {
       ((_: never) => { throw 'Unknown type'; })(node);
     }

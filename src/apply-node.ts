@@ -10,11 +10,6 @@ export interface ApplyNode extends BaseNode {
   arguments: Map<ArgumentId, NodeId>;
 }
 
-export interface ApplyData {
-  parent: BlockData;
-  block: BlockData;
-}
-
 export function getApplyNodeArgument(node: ApplyNode, argumentId: ArgumentId): NodeId {
   const nodeId = node.arguments.get(argumentId);
   if (nodeId === undefined) {
@@ -24,9 +19,9 @@ export function getApplyNodeArgument(node: ApplyNode, argumentId: ArgumentId): N
 }
 
 export function getApplyNodeBlockData(node: ApplyNode, blockData: BlockData): BlockData {
-  const applyData = blockData.nodes.get(node.nodeId) as ApplyData | undefined;
+  const applyData = blockData.nodes.get(node.nodeId) as BlockData | undefined;
   if (applyData === undefined) {
     throw 'Missing node data';
   }
-  return applyData.block;  
+  return applyData;
 }

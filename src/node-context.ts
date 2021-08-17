@@ -8,5 +8,5 @@ export interface NodeContext {
 }
 
 export interface NodeContextData {
-  context: {};
+  __brand: "NodeContextData";
 }

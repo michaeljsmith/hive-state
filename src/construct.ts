@@ -1,4 +1,4 @@
-import { ApplyData, ApplyNode } from "./apply-node.js";
+import { ApplyNode } from "./apply-node.js";
 import { Block, BlockData, getLocalNode } from "./block.js";
 import { NodeContextData } from "./node-context.js";
 import { Node } from "./node.js";
@@ -30,20 +30,7 @@ function constructNode(node: Node, parent: BlockData): {} | undefined {
   }
 }
 
-function constructApplyNode(node: ApplyNode, parent: BlockData): ApplyData {
+function constructApplyNode(node: ApplyNode, parent: BlockData): BlockData {
   const encloserData = queryNode(node.parent, parent, node.lambda, (input) => input as BlockData);
-
-  // We need to construct the new block, passing in the object we are
-  // constructing as a parameter. This is potentially unsafe, since the value
-  // is not constructed yet, so we need to promise not to use the data at
-  // this point.
-  //
-  // Unfortunately there's no straightforward way to express this promise to
-  // Typescript, so we need to do a cast.
-  const data = {} as ApplyData;
-  const context = {context: data};
-  data.parent = parent;
-  const blockData = constructBlock(node.block, encloserData, context);
-  data.block = blockData;
-  return data;
+  return constructBlock(node.block, encloserData, parent as unknown as NodeContextData);
 }

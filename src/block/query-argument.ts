@@ -41,7 +41,7 @@ export function queryNode<R>(
   } else if (node.type === 'lambda') {
     // Apply the query - consider the data to be the block data, since that
     // is the only relevant data for a lambda.
-    return query(blockData);
+    return query(blockData as never);
   } else if (node.type === 'apply') {
     // Recurse to the apply block.
     const childData = getNodeData(node, blockData) as BlockData;

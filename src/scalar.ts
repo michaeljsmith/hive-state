@@ -1,7 +1,7 @@
 import { InstanceNode, newNodeId } from "./block/index.js";
 import { ScalarType } from "./scalar/index.js";
 import { ScalarFunctor } from "./scalar/scalar-functor.js";
-import { addNode, currentScope } from "./scope.js";
+import { addNode } from "./scope.js";
 import { Value } from "./value.js";
 
 export function scalar<T>(initialValue: T): Value<ScalarType<T>> {

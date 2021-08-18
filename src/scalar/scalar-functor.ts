@@ -1,4 +1,5 @@
 import { ArgumentId, Change, Functor, NodeContext, Query } from "../block/index.js";
+import { ScalarAccessor } from "./scalar-type.js";
 
 interface ScalarData<T> {
   value: T;
@@ -28,6 +29,12 @@ export class ScalarFunctor<T> implements Functor {
       throw 'Missing data';
     }
 
-    return query(scalarData.value as never);
+    const accessor: ScalarAccessor<T> = {
+      get() {
+        return scalarData.value;
+      }
+    };
+
+    return query(accessor as never);
   }
 }

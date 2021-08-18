@@ -5,7 +5,7 @@ interface ScalarData<T> {
 }
 
 export class ScalarFunctor<T> implements Functor {
-  initialValue: T;
+  private initialValue: T;
 
   constructor(initialValue: T) {
     this.initialValue = initialValue;

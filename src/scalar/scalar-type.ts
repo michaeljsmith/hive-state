@@ -9,7 +9,7 @@ export interface MutableScalarAccessor<T> extends ScalarAccessor<T> {
 }
 
 export interface ScalarMutator<T> {
-  set(): T;
+  set(value: T): T;
 }
 
 export type ScalarType<T> = ValueTypeTemplate<ScalarAccessor<T>, ScalarMutator<T>>;

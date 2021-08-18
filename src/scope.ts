@@ -1,4 +1,6 @@
 import { Node, NodeId } from "./block/index.js";
+import { ValueType } from "./value-type.js";
+import { brandAsValue, Value } from "./value.js";
 
 export interface Scope {
   parent: Scope | null;
@@ -14,4 +16,15 @@ export function currentScope(): Scope {
   }
 
   return scope;
+}
+
+export function addNode<T extends ValueType>(nodeId: NodeId, node: Node): Value<T> {
+  const scope = currentScope();
+  scope.nodes.set(nodeId, node);
+  scope.nodeOrder.push(nodeId);
+
+  return brandAsValue<T>({
+    scope,
+    nodeId,
+  });
 }

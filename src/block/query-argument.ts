@@ -1,4 +1,4 @@
-import { ArgumentId } from "./argument-id.js";
+import { ArgumentId, enclosureArgumentId } from "./argument-id.js";
 import { getInstanceArgument, InstanceData } from "./instance-node.js";
 import { Block, BlockData, getNodeData } from "./block.js";
 import { NodeId } from "./node-id.js";
@@ -16,6 +16,16 @@ export function queryArgument<R>(
     // Node not defined here - check the enclosing scope.
     return queryArgument(block.enclosure, blockData.enclosure, nodeId, argumentId, query);
   } else if (node.type === 'instance') {
+    // -1 is an implicit argument representing the enclosing block data.
+    if (argumentId === enclosureArgumentId) {
+      if (node.lambdaNodeId === undefined) {
+        // This block has no enclosure.
+        return query(undefined as never);
+      }
+      return queryNode(block, blockData, node.lambdaNodeId, query);
+    }
+
+    // Otherwise, look up the argument in the standard arguments map.
     const argumentNodeId = getInstanceArgument(node, argumentId);
     return queryNode(block, blockData, argumentNodeId, query);
   } else if (node.type === 'argument' || node.type === 'lambda') {

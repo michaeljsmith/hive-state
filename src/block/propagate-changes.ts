@@ -1,7 +1,7 @@
 import { ArgumentId, enclosureArgumentId } from "./argument-id.js";
 import { Block, BlockData, getNode, getNodeData } from "./block.js";
 import { Change } from "./change.js";
-import { InstanceData } from "./instance-data.js";
+import { InstanceData } from "./instance-node.js";
 import { LambdaChange, lambdaChange } from "./lambda.js";
 import { NodeId } from "./node-id.js";
 

@@ -1,5 +1,5 @@
 import { ArgumentId, Change, Functor, NodeContext, Query } from "../block/index.js";
-import { ScalarAccessor } from "./scalar-type.js";
+import { MutableScalarAccessor, ScalarMutator } from "./scalar-type.js";
 
 interface ScalarData<T> {
   value: T;
@@ -23,16 +23,26 @@ export class ScalarFunctor<T> implements Functor {
     return undefined;
   }
 
-  handleQuery<R>(data: {} | undefined, _context: NodeContext, query: Query<R>): R {
+  handleQuery<R>(data: {} | undefined, context: NodeContext, query: Query<R>): R {
     const scalarData = data as ScalarData<T> | undefined;
     if (scalarData === undefined) {
       throw 'Missing data';
     }
 
-    const accessor: ScalarAccessor<T> = {
+    const accessor: MutableScalarAccessor<T> = {
       get() {
         return scalarData.value;
-      }
+      },
+
+      setter() {
+        return (value) => {
+          // Update the value.
+          scalarData.value = value;
+
+          // Propagate the change.
+          context.handleOutputChange((mutator: ScalarMutator<T>) => mutator.set(value));
+        };
+      },
     };
 
     return query(accessor as never);

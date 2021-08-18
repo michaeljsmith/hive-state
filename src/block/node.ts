@@ -14,8 +14,9 @@ export interface LambdaNode {
 
 export interface InstanceNode {
   type: 'instance';
-  lambdaNodeId: NodeId;
+  lambdaNodeId?: NodeId;
   functor: Functor;
+  arguments: Map<ArgumentId, NodeId>;
 }
 
 export type Node = ArgumentNode | LambdaNode | InstanceNode;

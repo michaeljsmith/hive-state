@@ -1,6 +1,7 @@
+import { Accessor } from "../block/accessor.js";
 import { ValueTypeTemplate } from "../value-type.js";
 
-export interface ScalarAccessor<T> {
+export interface ScalarAccessor<T> extends Accessor {
   get(): T;
 }
 

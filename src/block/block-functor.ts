@@ -6,8 +6,8 @@ import { Functor } from "./functor.js";
 import { LambdaChange } from "./lambda.js";
 import { NodeContext } from "./node-context.js";
 import { propagateChanges } from "./propagate-changes.js";
-import { queryNode } from "./query-argument.js";
-import { Query } from "./query.js";
+import { nodeAccessor } from "./node-accessor.js";
+import { Accessor } from "./accessor.js";
 
 export class BlockFunctor implements Functor {
   private block: Block;
@@ -33,12 +33,12 @@ export class BlockFunctor implements Functor {
     return propagateChanges(this.block, blockData, argumentChanges, nodeChanges);
   }
 
-  handleQuery<R>(data: {} | undefined, context: NodeContext, query: Query<R>): R {
+  accessor(data: {} | undefined, context: NodeContext): Accessor {
     const blockData = data as BlockData | undefined;
     if (blockData === undefined) {
       throw "no data";
     }
 
-    return queryNode(this.block, blockData, this.block.outputNodeId, query);
+    return nodeAccessor(this.block, blockData, this.block.outputNodeId);
   }
 }

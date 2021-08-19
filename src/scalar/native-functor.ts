@@ -1,7 +1,5 @@
-import { asArgumentId } from "../block/argument-id.js";
-import { ArgumentId, Change, Functor, NodeContext, Query } from "../block/index.js";
-import { QueryFor } from "../value-type.js";
-import { ScalarMutator, ScalarType } from "./scalar-type.js";
+import { ArgumentId, asArgumentId, brandAsAccessor, Change, Functor, NodeContext } from "../block/index.js";
+import { ScalarAccessor, ScalarMutator } from "./scalar-type.js";
 
 export class NativeFunctor implements Functor {
   private fn: (...args: unknown[]) => unknown;
@@ -23,10 +21,13 @@ export class NativeFunctor implements Functor {
     return (mutator: ScalarMutator<unknown>) => mutator.set(value);
   }
 
-  handleQuery<R>(_data: {} | undefined, context: NodeContext, query: Query<R>): R {
-    const scalarQuery = query as QueryFor<ScalarType<unknown>, R>;
+  accessor(_data: {} | undefined, context: NodeContext): ScalarAccessor<unknown> {
     const value = this.evaluate(context);
-    return scalarQuery({get() {return value;}});
+    return brandAsAccessor<ScalarAccessor<unknown>>({
+      get() {
+        return value;
+      },
+    });
   }
 
   private evaluate(context: NodeContext): unknown {
@@ -35,7 +36,7 @@ export class NativeFunctor implements Functor {
   }
 
   private evaluateArgument(context: NodeContext, argumentIndex: number) {
-    const query: QueryFor<ScalarType<unknown>, unknown> = (accessor) => accessor.get();
-    context.queryArgument(asArgumentId(argumentIndex), query);
+    const argumentAccessor = context.argumentAccessor(asArgumentId(argumentIndex)) as ScalarAccessor<unknown>;
+    return argumentAccessor.get();
   }
 }

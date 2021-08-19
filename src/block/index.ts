@@ -1,3 +1,4 @@
+export { Accessor, brandAsAccessor } from "./accessor.js";
 export { ArgumentId, asArgumentId } from "./argument-id.js";
 export { ArgumentNode } from "./argument-node.js";
 export { BlockFunctor } from "./block-functor.js";
@@ -7,4 +8,3 @@ export { InstanceNode } from "./instance-node.js";
 export { Node } from "./node.js";
 export { NodeContext } from "./node-context.js";
 export { NodeId, newNodeId } from "./node-id.js";
-export { Query } from "./query.js";

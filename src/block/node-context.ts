@@ -1,8 +1,8 @@
+import { Accessor } from "./accessor.js";
 import { ArgumentId } from "./argument-id.js";
 import { Change } from "./change.js";
-import { Query } from "./query.js";
 
 export interface NodeContext {
-  queryArgument<R>(argumentId: ArgumentId, query: Query<R>): R;
+  argumentAccessor(argumentId: ArgumentId): Accessor;
   handleOutputChange(change: Change): void;
 }

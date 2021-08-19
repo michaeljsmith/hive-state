@@ -5,14 +5,15 @@ import { NodeContext } from "./node-context.js";
 import { NodeId } from "./node-id.js";
 import { Node } from "./node.js";
 import { propagateNodeChange } from "./propagate-changes.js";
-import { queryArgument } from "./query-argument.js";
+import { argumentAccessor } from "./node-accessor.js";
+import { LambdaAccessor } from "./lambda.js";
 
 export function constructBlock(block: Block, context: NodeContext): BlockData {
   // Query the enclosure, using the special implicit argument ID.
-  const enclosure = context.queryArgument(enclosureArgumentId, (input) => input as BlockData);
+  const enclosureAccessor = context.argumentAccessor(enclosureArgumentId) as LambdaAccessor;
 
   const data: BlockData = {
-    enclosure,
+    enclosure: enclosureAccessor.getBlockData(),
     context,
     nodes: new Map(),
   };
@@ -40,12 +41,12 @@ function constructNode(parent: Block, parentData: BlockData, nodeId: NodeId, nod
 
 function constructInstanceNode(parent: Block, parentData: BlockData, nodeId: NodeId, node: InstanceNode): InstanceData {
   const context: NodeContext = {
-    handleOutputChange(change) {
-      propagateNodeChange(parent, parentData, nodeId, change);
+    argumentAccessor(argumentId) {
+      return argumentAccessor(parent, parentData, nodeId, argumentId);
     },
 
-    queryArgument(argumentId, query) {
-      return queryArgument(parent, parentData, nodeId, argumentId, query);
+    handleOutputChange(change) {
+      propagateNodeChange(parent, parentData, nodeId, change);
     },
   };
 

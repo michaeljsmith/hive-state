@@ -6,12 +6,10 @@ export interface ValueTypeTemplate<Accessor, Mutator> {
 
 export type ValueType = ValueTypeTemplate<unknown, unknown>;
 
-export type Accessor<V extends ValueType> =
+export type AccessorFor<V extends ValueType> =
   V extends ValueTypeTemplate<infer A, unknown> ? A : never;
 
 export type Mutator<V extends ValueType> =
   V extends ValueTypeTemplate<unknown, infer M> ? M : never;
-
-export type QueryFor<V extends ValueType, R> = (accessor: Accessor<V>) => R;
 
 export type ChangeFor<V extends ValueType> = (mutator: Mutator<V>) => void;

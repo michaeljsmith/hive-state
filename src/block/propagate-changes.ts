@@ -59,9 +59,12 @@ function generalPropagateChanges(
       change = lambdaChange(nodeChanges);
     } else if (node.type === 'instance') {
       // Assemble the argument changes.
-      const argumentChanges = new Map<ArgumentId, Change | undefined>();
+      const argumentChanges = new Map<ArgumentId, Change>();
       for (const [argumentId, nodeId] of node.arguments) {
-        argumentChanges.set(argumentId, nodeChanges.get(nodeId))
+        const change = nodeChanges.get(nodeId);
+        if (change !== undefined) {
+          argumentChanges.set(argumentId, change);
+        }
       }
 
       // Get the enclosure changes - pass them to functor using the implicit argument ID (-1).

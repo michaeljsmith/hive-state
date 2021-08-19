@@ -14,7 +14,7 @@ export class NativeFunctor implements Functor {
     return undefined;
   }
 
-  handleArgumentChanges(_data: {} | undefined, context: NodeContext, argumentChanges: Map<ArgumentId, Change | undefined>): Change | undefined {
+  handleArgumentChanges(_data: {} | undefined, context: NodeContext, argumentChanges: Map<ArgumentId, Change>): Change | undefined {
     if (argumentChanges.size == 0) {
       return undefined;
     }

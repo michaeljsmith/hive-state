@@ -19,7 +19,7 @@ export class ScalarFunctor<T> implements Functor {
     return data;
   }
 
-  handleArgumentChanges(_data: {} | undefined, _context: NodeContext, _argumentChanges: Map<ArgumentId, Change | undefined>): Change | undefined {
+  handleArgumentChanges(_data: {} | undefined, _context: NodeContext, _argumentChanges: Map<ArgumentId, Change>): Change | undefined {
     return undefined;
   }
 

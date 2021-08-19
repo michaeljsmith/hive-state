@@ -5,6 +5,6 @@ import { Query } from "./query.js";
 
 export interface Functor {
   construct(context: NodeContext): {} | undefined;
-  handleArgumentChanges(data: {} | undefined, context: NodeContext, argumentChanges: Map<ArgumentId, Change | undefined>): Change | undefined;
+  handleArgumentChanges(data: {} | undefined, context: NodeContext, argumentChanges: Map<ArgumentId, Change>): Change | undefined;
   handleQuery<R>(data: {} | undefined, context: NodeContext, query: Query<R>): R;
 }

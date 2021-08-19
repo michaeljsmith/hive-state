@@ -1,7 +1,7 @@
 import { Block } from "./block/block.js";
 import { Node, NodeId } from "./block/index.js";
 import { ValueType } from "./value-type.js";
-import { brandAsValue, Value } from "./value.js";
+import { Value } from "./value.js";
 
 export interface Scope {
   parent: Scope | null;
@@ -55,8 +55,5 @@ export function addNode<T extends ValueType>(nodeId: NodeId, node: Node): Value<
   scope.block.nodes.set(nodeId, node);
   scope.block.nodeOrder.push(nodeId);
 
-  return brandAsValue<T>({
-    scope,
-    nodeId,
-  });
+  return new Value<T>(scope, nodeId);
 }

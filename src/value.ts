@@ -2,16 +2,17 @@ import { NodeId } from "./block/node-id.js";
 import { Scope } from "./scope.js";
 import { ValueType } from "./value-type.js";
 
-export interface Value<T extends ValueType> { 
-  __typeBrand: T;
+export class Value<T extends ValueType> {
+  __typeBrand!: T;
   scope: Scope;
   nodeId: NodeId;
-}
 
-export function brandAsValue<T extends ValueType>(
-    value: Omit<Value<T>, "__typeBrand">)
-: Value<T> {
-  return value as Value<T>;
-}
+  constructor(scope: Scope, nodeId: NodeId) {
+    this.scope = scope;
+    this.nodeId = nodeId;
+  }
 
-// export type ValueTypeOf<V extends Value<ValueType>> = V extends Value<infer T> ? T : never;
+  newFacade<Facade extends Value<T>>(ctor: new (scope: Scope, nodeId: NodeId) => Facade): Facade {
+    return new ctor(this.scope, this.nodeId);
+  }
+}

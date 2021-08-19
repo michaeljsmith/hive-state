@@ -1,11 +1,11 @@
+import { Block } from "./block/block.js";
 import { Node, NodeId } from "./block/index.js";
 import { ValueType } from "./value-type.js";
 import { brandAsValue, Value } from "./value.js";
 
 export interface Scope {
   parent: Scope | null;
-  nodes: Map<NodeId, Node>;
-  nodeOrder: NodeId[];
+  block: Block;
 }
 
 let scope: Scope | null = null;
@@ -18,10 +18,38 @@ export function currentScope(): Scope {
   return scope;
 }
 
+export function inRootScope<T extends Value<ValueType>>(fn: () => T): Block {
+  if (scope !== null) {
+    throw "existing scope";
+  }
+
+  return inScope(fn);
+}
+
+export function inScope<T extends Value<ValueType>>(fn: () => T): Block {
+  scope = {
+    parent: scope,
+    block: {
+      enclosure: scope?.block ?? null,
+      nodes: new Map(),
+      nodeOrder: [],
+      outputNodeId: "INVALID" as NodeId,
+    },
+  }
+
+  try {
+    const result = fn();
+    scope.block.outputNodeId = result.nodeId;
+    return scope.block;
+  } finally {
+    scope = scope.parent;
+  }
+}
+
 export function addNode<T extends ValueType>(nodeId: NodeId, node: Node): Value<T> {
   const scope = currentScope();
-  scope.nodes.set(nodeId, node);
-  scope.nodeOrder.push(nodeId);
+  scope.block.nodes.set(nodeId, node);
+  scope.block.nodeOrder.push(nodeId);
 
   return brandAsValue<T>({
     scope,

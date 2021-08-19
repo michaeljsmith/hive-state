@@ -13,3 +13,5 @@ export function brandAsValue<T extends ValueType>(
 : Value<T> {
   return value as Value<T>;
 }
+
+// export type ValueTypeOf<V extends Value<ValueType>> = V extends Value<infer T> ? T : never;

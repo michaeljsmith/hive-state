@@ -1,4 +1,6 @@
 export { ArgumentId, asArgumentId } from "./argument-id.js";
+export { ArgumentNode } from "./argument-node.js";
+export { BlockFunctor } from "./block-functor.js";
 export { Change } from "./change.js";
 export { Functor } from "./functor.js";
 export { InstanceNode } from "./instance-node.js";

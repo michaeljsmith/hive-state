@@ -1,6 +1,6 @@
 import { ArgumentId, enclosureArgumentId } from "./argument-id.js";
 import { getInstanceArgument, InstanceData } from "./instance-node.js";
-import { Block, BlockData, getNodeData } from "./block.js";
+import { Block, BlockData, getEnclosure, getEnclosureData, getNodeData } from "./block.js";
 import { NodeId } from "./node-id.js";
 import { Query } from "./query.js";
 
@@ -14,7 +14,7 @@ export function queryArgument<R>(
   const node = block.nodes.get(nodeId);
   if (node === undefined) {
     // Node not defined here - check the enclosing scope.
-    return queryArgument(block.enclosure, blockData.enclosure, nodeId, argumentId, query);
+    return queryArgument(getEnclosure(block), getEnclosureData(blockData), nodeId, argumentId, query);
   } else if (node.type === 'instance') {
     // -1 is an implicit argument representing the enclosing block data.
     if (argumentId === enclosureArgumentId) {
@@ -44,7 +44,7 @@ export function queryNode<R>(
   const node = block.nodes.get(nodeId);
   if (node === undefined) {
     // Node not defined here - check the enclosing scope.
-    return queryNode(block.enclosure, blockData.enclosure, nodeId, query);
+    return queryNode(getEnclosure(block), getEnclosureData(blockData), nodeId, query);
   } else if (node.type === 'argument') {
     // Recurse to the caller
     return blockData.context.queryArgument(node.argumentId, query);

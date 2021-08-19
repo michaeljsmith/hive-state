@@ -18,6 +18,10 @@ export function currentScope(): Scope {
   return scope;
 }
 
+export function scopeExists(): boolean {
+  return scope !== null;
+}
+
 export function inRootScope<T extends Value<ValueType>>(fn: () => T): Block {
   if (scope !== null) {
     throw "existing scope";

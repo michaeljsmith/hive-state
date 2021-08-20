@@ -22,9 +22,10 @@ export class NativeFunctor implements Functor {
   }
 
   accessor(_data: {} | undefined, context: NodeContext): ScalarAccessor<unknown> {
-    const value = this.evaluate(context);
+    const self = this;
     return brandAsAccessor<ScalarAccessor<unknown>>({
       get() {
+        const value = self.evaluate(context);
         return value;
       },
     });
@@ -32,7 +33,7 @@ export class NativeFunctor implements Functor {
 
   private evaluate(context: NodeContext): unknown {
     const args = [...Array(this.fn.length).keys()].map((x) => this.evaluateArgument(context, x));
-    return this.fn(args);
+    return this.fn(...args);
   }
 
   private evaluateArgument(context: NodeContext, argumentIndex: number) {

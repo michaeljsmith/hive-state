@@ -14,4 +14,4 @@ export interface ScalarMutator<T> {
 }
 
 export type ScalarType<T> = ValueTypeTemplate<ScalarAccessor<T>, ScalarMutator<T>>;
-export type MutableScalarType<T> = ValueTypeTemplate<ScalarAccessor<T>, ScalarMutator<T>>;
+export type MutableScalarType<T> = ValueTypeTemplate<MutableScalarAccessor<T>, ScalarMutator<T>>;

@@ -10,10 +10,10 @@ import { LambdaAccessor } from "./lambda.js";
 
 export function constructBlock(block: Block, context: NodeContext): BlockData {
   // Query the enclosure, using the special implicit argument ID.
-  const enclosureAccessor = context.argumentAccessor(enclosureArgumentId) as LambdaAccessor;
+  const enclosureAccessor = block.enclosure !== null ? context.argumentAccessor(enclosureArgumentId) as LambdaAccessor : undefined;
 
   const data: BlockData = {
-    enclosure: enclosureAccessor.getBlockData(),
+    enclosure: enclosureAccessor?.getBlockData() ?? null,
     context,
     nodes: new Map(),
   };
@@ -52,6 +52,6 @@ function constructInstanceNode(parent: Block, parentData: BlockData, nodeId: Nod
 
   return {
     context,
-    data: constructBlock(parent, context),
+    data: node.functor.construct(context),
   };
 }

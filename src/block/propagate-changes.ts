@@ -56,7 +56,13 @@ function generalPropagateChanges(
       // However, we know that applications of the lambda will only reference
       // preceding nodes, so changes to later nodes will have no impact.
       // Therefore we can get away without copying.
-      change = lambdaChange(nodeChanges);
+      //
+      // NOTE: if we did make a copy, it would make sense to copy just the captured nodes.
+      //
+      // Check whether any captured nodes have been changed.
+      if ([...node.captures].some((nodeId) => nodeChanges.has(nodeId))) {
+        change = lambdaChange(nodeChanges);
+      }
     } else if (node.type === 'instance') {
       // Assemble the argument changes.
       const argumentChanges = new Map<ArgumentId, Change>();

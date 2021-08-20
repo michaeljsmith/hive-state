@@ -8,4 +8,11 @@ describe('hive/react', function() {
     accessor.setter()(5);
     expect(accessor.get()).equals(5);
   });
+
+  it('propagates change in trivial block', function() {
+    const result = [0];
+    const accessor = host(() => scalar(0), (change) => change({set(value) {result[0] = value;}}));
+    accessor.setter()(2);
+    expect(result[0]).equals(2);
+  });
 });

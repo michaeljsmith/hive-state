@@ -27,7 +27,7 @@ export function propagateNodeChange(
   if (nodeIndex === -1) {
     throw 'invalid node';
   }
-  const outputChange = generalPropagateChanges(block, blockData, nodeIndex, nodeChanges, new Map());
+  const outputChange = generalPropagateChanges(block, blockData, nodeIndex + 1, nodeChanges, new Map());
 
   // Recurse to caller block.
   if (outputChange !== undefined) {

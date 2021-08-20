@@ -37,7 +37,7 @@ export class NativeFunctor implements Functor {
   }
 
   private evaluateArgument(context: NodeContext, argumentIndex: number) {
-    const argumentAccessor = context.argumentAccessor(asArgumentId(argumentIndex)) as ScalarAccessor<unknown>;
+    const argumentAccessor = context.argumentAccessor(asArgumentId(argumentIndex.toString())) as ScalarAccessor<unknown>;
     return argumentAccessor.get();
   }
 }

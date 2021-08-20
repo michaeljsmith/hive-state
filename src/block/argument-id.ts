@@ -1,7 +1,7 @@
-export type ArgumentId = number & {__brand: "ArgumentId"};
+export type ArgumentId = string & {__brand: "ArgumentId"};
 
-export function asArgumentId(label: number): ArgumentId {
+export function asArgumentId(label: string): ArgumentId {
   return label as ArgumentId;
 }
 
-export const enclosureArgumentId = asArgumentId(-1);
+export const enclosureArgumentId = asArgumentId("#enclosure");

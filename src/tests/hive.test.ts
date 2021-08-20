@@ -21,6 +21,24 @@ describe('hive/react', function() {
     expect(accessor.get("x").get()).equals(3);
   });
 
+  it('evaluates property', function() {
+    const accessor = host(() => {
+      const obj = object({x: scalar(7)});
+      return obj.get("x");
+    });
+    expect(accessor.get()).equals(7);
+  });
+
+  it('propagates property', function() {
+    const accessor = host(() => {
+      const param = scalar(2);
+      const prop = object({x: param}).get("x");
+      return object({param, prop});
+    });
+    accessor.get("param").setter()(3);
+    expect(accessor.get("prop").get()).equals(3);
+  });
+
   it('evaluates native call', function() {
     const sum = native((x: number, y: number) => x + y);
     const accessor = host(() => {

@@ -26,7 +26,7 @@ export function component<Args extends Value<ValueType>[], T extends ValueType> 
     // Create a new instance node.
     const nodeId = newNodeId();
     const argumentMap: Map<ArgumentId, NodeId> = new Map(args.map(
-      (x, i) => [asArgumentId(i), x.nodeId]));
+      (x, i) => [asArgumentId(i), x.reference()]));
     const node: InstanceNode = {
       type: 'instance',
       functor: new BlockFunctor(block),

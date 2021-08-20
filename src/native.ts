@@ -11,7 +11,7 @@ export function native<Args extends unknown[], T> (
     // Create a new node to represent the mapping.
     const nodeId = newNodeId();
     const argumentMap: Map<ArgumentId, NodeId> = new Map(args.map(
-      (x, i) => [asArgumentId(i), x.nodeId]));
+      (x, i) => [asArgumentId(i), x.reference()]));
     const node: InstanceNode = {
       type: 'instance',
       functor: new NativeFunctor(fn as (...args: unknown[]) => unknown),

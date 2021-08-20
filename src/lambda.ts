@@ -13,7 +13,7 @@ export function lambda<Args extends Value<ValueType>[], T extends ValueType> (
   }
 
   // TODO: Do this lazily to allow recursion.
-  const block = inScope(() => {
+  const {block, captures} = inScope(() => {
     // Add nodes to represent the arguments.
     const argumentValues = [...Array(fn.length).keys()].map((i) => {
       const argNodeId = newNodeId();
@@ -31,6 +31,7 @@ export function lambda<Args extends Value<ValueType>[], T extends ValueType> (
   const lambdaNodeId = newNodeId();
   const lambdaNode: LambdaNode = {
     type: 'lambda',
+    captures,
   };
   const lambdaValue = addNode(lambdaNodeId, lambdaNode);
 
@@ -38,11 +39,11 @@ export function lambda<Args extends Value<ValueType>[], T extends ValueType> (
     // Create a new instance node.
     const nodeId = newNodeId();
     const argumentMap: Map<ArgumentId, NodeId> = new Map(args.map(
-      (x, i) => [asArgumentId(i), x.nodeId]));
+      (x, i) => [asArgumentId(i), x.reference()]));
     const node: InstanceNode = {
       type: 'instance',
       functor: new BlockFunctor(block),
-      lambdaNodeId: lambdaValue.nodeId,
+      lambdaNodeId: lambdaValue.reference(),
       arguments: argumentMap,
     };
     return addNode<T>(nodeId, node);

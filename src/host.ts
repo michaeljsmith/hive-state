@@ -1,17 +1,19 @@
 import { constructBlock, NodeContext } from "./block/index.js";
 import { nodeAccessor } from "./block/node-accessor.js";
 import { inRootScope } from "./scope.js";
-import { AccessorFor, ChangeFor, ValueType } from "./value-type.js";
+import { AccessorFor, ChangeFor, Mutator, ValueType } from "./value-type.js";
 import { Value } from "./value.js";
 
-export function host<T extends ValueType>(fn: () => Value<T>, callback?: (change: ChangeFor<T>) => void): AccessorFor<T> {
+export function host<T extends ValueType>(fn: () => Value<T>, mutator?: Mutator<T>): AccessorFor<T> {
   // Get the block.
   const block = inRootScope(() => fn());
 
   // Create the context for the block.
   const context: NodeContext = {
     handleOutputChange(change) {
-      callback?.(change as ChangeFor<T>);
+      if (mutator) {
+        change(mutator as never);
+      }
     },
 
     argumentAccessor(_argumentId) {

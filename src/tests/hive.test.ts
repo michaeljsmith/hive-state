@@ -3,17 +3,16 @@ import { Value, host, lambda, native, object, scalar, ChangeFor } from "../index
 import { ObjectType } from "../object/index.js";
 import { ScalarType } from "../scalar/index.js";
 
-function testCallback(result: [number]) {
-  return (change: ChangeFor<ObjectType<{}>>) => {
-    change({
-      mutate(key, change) {
-        if (key === "result") {
-          (change as unknown as ChangeFor<ScalarType<number>>)({set(value) {result[0] = value;}})
-        }
+function testMutator(result: [number]) {
+  return {
+    mutate(key: string, change: never) {
+      if (key === "result") {
+        (change as unknown as ChangeFor<ScalarType<number>>)({set(value) {result[0] = value;}})
       }
-    });
-  }
+    }
+  };
 }
+
 describe('hive/react', function() {
   it('evaluates trival block', function() {
     const accessor = host(() => scalar(3));
@@ -24,7 +23,7 @@ describe('hive/react', function() {
 
   it('propagates change in trivial block', function() {
     const result = [0];
-    const accessor = host(() => scalar(0), (change) => change({set(value) {result[0] = value;}}));
+    const accessor = host(() => scalar(0), {set(value) {result[0] = value;}});
     accessor.setter()(2);
     expect(result[0]).equals(2);
   });
@@ -75,7 +74,7 @@ describe('hive/react', function() {
       const argument = scalar(1);
       const result = fn(argument);
       return object({capture, argument, result});
-    }, testCallback(result));
+    }, testMutator(result));
     expect(accessor.get("result").get()).equals(3);
     accessor.get("capture").setter()(3);
     expect(accessor.get("result").get()).equals(4);

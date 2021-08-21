@@ -1,6 +1,19 @@
 import { expect } from "chai";
-import { host, native, object, scalar } from "../index.js";
+import { Value, host, lambda, native, object, scalar, ChangeFor } from "../index.js";
+import { ObjectType } from "../object/index.js";
+import { ScalarType } from "../scalar/index.js";
 
+function testCallback(result: [number]) {
+  return (change: ChangeFor<ObjectType<{}>>) => {
+    change({
+      mutate(key, change) {
+        if (key === "result") {
+          (change as unknown as ChangeFor<ScalarType<number>>)({set(value) {result[0] = value;}})
+        }
+      }
+    });
+  }
+}
 describe('hive/react', function() {
   it('evaluates trival block', function() {
     const accessor = host(() => scalar(3));
@@ -49,5 +62,26 @@ describe('hive/react', function() {
     expect(accessor.get("result").get()).equals(7);
     accessor.get("param").setter()(1);
     expect(accessor.get("result").get()).equals(5);
+  });
+
+  it('evaluates lambda', function() {
+    const sum = native((x: number, y: number) => x + y);
+    const result: [number] = [0];
+    const accessor = host(() => {
+      const capture = scalar(2);
+      const fn = lambda((x: Value<ScalarType<number>>) => {
+        return sum(capture, x);
+      });
+      const argument = scalar(1);
+      const result = fn(argument);
+      return object({capture, argument, result});
+    }, testCallback(result));
+    expect(accessor.get("result").get()).equals(3);
+    accessor.get("capture").setter()(3);
+    expect(accessor.get("result").get()).equals(4);
+    expect(result[0]).equals(4);
+    accessor.get("argument").setter()(2);
+    expect(accessor.get("result").get()).equals(5);
+    expect(result[0]).equals(5);
   });
 });

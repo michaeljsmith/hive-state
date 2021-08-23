@@ -1,5 +1,5 @@
 import { Block } from "./block/block.js";
-import { Node, NodeId } from "./block/index.js";
+import { ArgumentNode, asArgumentId, LambdaNode, newNodeId, Node, NodeId } from "./block/index.js";
 import { ValueType } from "./value-type.js";
 import { Value } from "./value.js";
 
@@ -49,7 +49,7 @@ export function inScope<T extends Value<ValueType>>(fn: () => T): {block: Block,
 
   try {
     const result = fn();
-    _scope.block.outputNodeId = result.internalGetNodeId();
+    _scope.block.outputNodeId = result.reference();
     return {
       block: _scope.block,
       captures: _scope.captures,
@@ -84,4 +84,31 @@ export function referenceNode(nodeId: NodeId): void {
   if (!scopeIsAncestor) {
     throw 'invalid scope';
   }
+}
+
+export function addLambdaNode<Args extends Value<ValueType>[], T extends ValueType>(
+    fn: (...args: Args) => Value<T>)
+: {block: Block, lambdaValue: Value<ValueType>} {
+  const {block, captures} = inScope(() => {
+    // Add nodes to represent the arguments.
+    const argumentValues = [...Array(fn.length).keys()].map((i) => {
+      const argNodeId = newNodeId();
+      const argNode: ArgumentNode = {
+        type: 'argument',
+        argumentId: asArgumentId(i.toString()),
+      };
+      return addNode(argNodeId, argNode);
+    })
+
+    return fn(...(argumentValues as Args));
+  });
+
+  // Add a lambda node
+  const lambdaNodeId = newNodeId();
+  const lambdaNode: LambdaNode = {
+    type: 'lambda',
+    captures,
+  };
+  const lambdaValue = addNode(lambdaNodeId, lambdaNode);
+  return {block, lambdaValue};
 }

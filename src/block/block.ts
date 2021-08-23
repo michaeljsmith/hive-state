@@ -42,7 +42,7 @@ export function getEnclosure(block: Block): Block {
 
 export function getEnclosureData(blockData: BlockData): BlockData {
   if (blockData.enclosure === null) {
-    throw 'unknown node';
+    throw new Error('unknown node');
   }
   return blockData.enclosure;
 }

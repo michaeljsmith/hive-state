@@ -60,7 +60,7 @@ function generalPropagateChanges(
       // NOTE: if we did make a copy, it would make sense to copy just the captured nodes.
       //
       // Check whether any captured nodes have been changed.
-      if ([...node.captures].some((nodeId) => nodeChanges.has(nodeId))) {
+      if (node.captures.size > 0 && [...node.captures].some((nodeId) => nodeChanges.has(nodeId))) {
         change = lambdaChange(nodeChanges);
       }
     } else if (node.type === 'instance') {

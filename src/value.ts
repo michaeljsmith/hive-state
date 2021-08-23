@@ -10,10 +10,6 @@ export class Value<T extends ValueType> {
     this.nodeId = nodeId;
   }
 
-  internalGetNodeId(): NodeId {
-    return this.nodeId;
-  }
-
   reference(): NodeId {
     referenceNode(this.nodeId);
     return this.nodeId;
